@@ -1,0 +1,19 @@
+language: node_js
+branches:
+  only:
+    - master
+    - /^greenkeeper/.*$/
+cache:
+  yarn: true
+  directories:
+    - node_modules
+node_js:
+  - node
+install:
+  - yarn
+script:
+  - yarn run test:prod && yarn build
+after_success:
+  - yarn report-coverage
+  - yarn deploy-docs
+  - yarn semantic-release
