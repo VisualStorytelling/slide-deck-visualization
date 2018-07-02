@@ -1,5 +1,5 @@
 import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry } from "@visualstorytelling/provenance-core";
-import { ProvenanceBasedSlidedeck, ProvenanceSlide } from "./provenance-slide-deck";
+import { ProvenanceBasedSlidedeck, ProvenanceSlide } from "../src/provenance-slide-deck";
 
 
 let graph: ProvenanceGraph;
