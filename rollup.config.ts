@@ -7,7 +7,7 @@ import json from 'rollup-plugin-json';
 
 const pkg = require('./package.json');
 
-const libraryName = 'provenance-based-slidedeck';
+const libraryName = 'provenance-slide-deck';
 
 export default {
   input: `src/${libraryName}.ts`,

@@ -1,13 +1,13 @@
 {
-  "name": "@visualstorytelling/provenance-based-slidedeck",
+  "name": "@visualstorytelling/provenance-slide-deck",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "main": "dist/provenance-based-slidedeck.umd.js",
-  "module": "dist/provenance-based-slidedeck.es5.js",
-  "typings": "dist/types/provenance-based-slidedeck.d.ts",
+  "main": "dist/provenance-slide-deck.umd.js",
+  "module": "dist/provenance-slide-deck.es5.js",
+  "typings": "dist/types/provenance-slide-deck.d.ts",
   "files": [
     "dist"
   ],
@@ -45,9 +45,6 @@
     "lint-staged": "^7.2.0",
     "lodash.camelcase": "^4.3.0",
     "prettier": "^1.13.5",
-    "ts-loader": "^4.3.0",
-    "tslint": "^5.10.0",
-    "typescript": "^2.8.3",
     "rimraf": "^2.6.1",
     "rollup": "^0.60.7",
     "rollup-plugin-commonjs": "^9.0.0",
@@ -55,6 +52,10 @@
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.11.1",
+    "ts-jest": "^23.0.0",
+    "ts-loader": "^4.3.0",
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.3",
     "v": "^0.3.0"
   },
   "peerDependencies": {
@@ -65,5 +66,29 @@
     "cross-env": "5.0.5",
     "d3": "^5.4.0",
     "d3-hierarchy": "^1.1.6"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "../node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/test/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 95,
+        "lines": 95,
+        "statements": 95
+      }
+    },
+    "collectCoverage": true
   }
 }
