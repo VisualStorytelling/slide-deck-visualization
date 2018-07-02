@@ -1,0 +1,69 @@
+{
+  "name": "@visualstorytelling/provenance-based-slidedeck",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "main": "dist/provenance-based-slidedeck.umd.js",
+  "module": "dist/provenance-based-slidedeck.es5.js",
+  "typings": "dist/types/provenance-based-slidedeck.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
+    "prebuild": "rimraf dist",
+    "build": "tsc --module commonjs && rollup -c rollup.config.ts",
+    "start": "rollup -c rollup.config.ts -w",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:prod": "npm run lint && npm run test -- --coverage --no-cache",
+    "deploy-docs": "ts-node tools/gh-pages-publish",
+    "report-coverage": "cat ./coverage/lcov.info | coveralls",
+    "commit": "git-cz",
+    "semantic-release": "semantic-release",
+    "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "tslint --fix",
+      "git add"
+    ],
+    "*.{css,scss,json}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "devDependencies": {
+    "@types/d3": "^5.0.0",
+    "@types/d3-hierarchy": "^1.1.2",
+    "@types/node": "^9.3.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.0",
+    "lodash.camelcase": "^4.3.0",
+    "prettier": "^1.13.5",
+    "ts-loader": "^4.3.0",
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.3",
+    "rimraf": "^2.6.1",
+    "rollup": "^0.60.7",
+    "rollup-plugin-commonjs": "^9.0.0",
+    "rollup-plugin-json": "^2.3.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.11.1",
+    "v": "^0.3.0"
+  },
+  "peerDependencies": {
+    "@visualstorytelling/provenance-core": "^1.1.2",
+    "@visualstorytelling/provenance-tree-visualization": "^1.0.2"
+  },
+  "dependencies": {
+    "cross-env": "5.0.5",
+    "d3": "^5.4.0",
+    "d3-hierarchy": "^1.1.6"
+  }
+}
