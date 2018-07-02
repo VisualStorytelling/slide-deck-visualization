@@ -79,23 +79,23 @@ describe('ProvenanceTreeSlidedeck', () => {
             expect(slideDeck.slides[1]).toBe(slide2);
             expect(slideDeck.slides[2]).toBe(slide3);
         });
-        describe('remove slides', () => {
-            beforeEach(() => {
-                slideDeck.addSlide(slide);
-                slideDeck.addSlide(slide2);
-                slideDeck.addSlide(slide3);
-            });
+    });
 
-            it('should remove at index', () => {
-                slideDeck.removeSlideAtIndex(1);
-                expect(slideDeck.slides).toEqual([slide, slide3]);
-            });
-
-            it('should remove at slide from argument', () => {
-                slideDeck.removeSlide(slide2);
-                expect(slideDeck.slides).toEqual([slide, slide3]);
-            })
+    describe('remove slides', () => {
+        beforeEach(() => {
+            slideDeck.addSlide(slide);
+            slideDeck.addSlide(slide2);
+            slideDeck.addSlide(slide3);
         });
-        
+
+        it('should remove at index', () => {
+            slideDeck.removeSlideAtIndex(1);
+            expect(slideDeck.slides).toEqual([slide, slide3]);
+        });
+
+        it('should remove at slide from argument', () => {
+            slideDeck.removeSlide(slide2);
+            expect(slideDeck.slides).toEqual([slide, slide3]);
+        })
     });
 });

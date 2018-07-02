@@ -47,6 +47,15 @@ export class ProvenanceSlide {
         this._annotations.push(annotation);
     }
 
+    public removeAnnotation(annotation: Annotation) {
+        const index = this._annotations.indexOf(annotation);
+        this._annotations.splice(index, 1);
+    }
+
+    public get annotations() {
+        return this._annotations;
+    }
+
     constructor(name: string, duration: number, delay: number, annotations: Annotation[] = [], node: (ProvenanceNode | null) = null) {
         this._name = name;
         this._duration = duration;
