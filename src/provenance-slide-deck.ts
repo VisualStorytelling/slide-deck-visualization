@@ -1,11 +1,9 @@
-export const bla = 'bla';
-
-import { ProvenanceGraphTraverser } from '@visualstorytelling/provenance-core';
 import { ProvenanceSlide } from './provenance-slide';
+import { ProvenanceGraphTraverser } from '@visualstorytelling/provenance-core';
 
-export type Annotation = any;
+type Annotation = any;
 
-export class ProvenanceSlidedeck {
+class ProvenanceSlidedeck {
     private _slides: ProvenanceSlide[] = [];
     private traverser: ProvenanceGraphTraverser;
 
@@ -59,3 +57,6 @@ export class ProvenanceSlidedeck {
         this._selectedSlide = value;
     }
 }
+
+export { ProvenanceSlidedeck, ProvenanceSlide, Annotation };
+export { ProvenanceSlidedeckVisualization } from './provenance-slide-deck-visualization';

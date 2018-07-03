@@ -11,7 +11,7 @@ const pkg = require('./package.json');
 const libraryName = 'provenance-slide-deck';
 
 export default {
-  input: `src/index.ts`,
+  input: `src/${libraryName}.ts`,
   output: [
     {
       file: pkg.main,
