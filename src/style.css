@@ -5,5 +5,5 @@ div.slidedeck__slide {
 }
 
 div.slidedeck__slide[draggable=true] {
-    background-color: #0074D9;
+    background-color: #00b8d9;
 }

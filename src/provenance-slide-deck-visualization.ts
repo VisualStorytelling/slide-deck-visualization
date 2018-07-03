@@ -8,13 +8,15 @@ import { ProvenanceSlide } from './provenance-slide';
 export class ProvenanceSlidedeckVisualization {
   private _slideDeck: ProvenanceSlidedeck;
   private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
-  private static slideTemplate: (data: ProvenanceSlide) => string = data => `
+  private static slideTemplate: (data: ProvenanceSlide) => string = data => {
+    return `
       <header>${data.name}</header>
       <span class="slide__name">${data.name}</span>
       <span class="slide__delay">Delay: ${data.delay}</span>
       <span class="slide__duration">Duration: ${data.duration}</span>
       <button class="slide__delete">Delete</button>
-  `
+    `;
+  }
 
   public update() {
     this._root.classed('slidedeck', true);
