@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+
 import { ProvenanceSlidedeck } from './provenance-slide-deck';
 import { ProvenanceSlide } from './provenance-slide';
 
@@ -21,6 +22,7 @@ export class ProvenanceSlidedeckVisualization {
     const newNodes = oldNodes
       .enter()
       .append('div')
+      .attr("draggable", true);
 
     oldNodes.merge(newNodes).html(ProvenanceSlidedeckVisualization.slideTemplate);
   }
