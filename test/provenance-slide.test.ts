@@ -27,7 +27,7 @@ const testNode1 = {
 
 describe('single slide', () => {
     it('should make a slide', () => {
-        var slide = new ProvenanceSlide('test1', 1, 0);
+        const slide = new ProvenanceSlide('test1', 1, 0);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
             
         expect(slide.name).toBe('test1');
@@ -38,7 +38,7 @@ describe('single slide', () => {
     });
 
     it('should make a slide with annotations and node set', () => {
-        var slide = new ProvenanceSlide('test2', 1, 0, ['haha'], testNode1);
+        const slide = new ProvenanceSlide('test2', 1, 0, ['haha'], testNode1);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
             
         expect(slide.name).toBe('test2');
@@ -49,7 +49,7 @@ describe('single slide', () => {
     });
 
     describe('setters for private fields', () => {
-        var slide;
+        let slide;
         beforeEach(() => {
             slide = new ProvenanceSlide('test1', 1, 0, ['haha'], testNode1);
         });
@@ -77,10 +77,10 @@ describe('single slide', () => {
             slide.node = testNode2;
             expect(slide.node).toBe(testNode2);
         });
-    })
+    });
 
     describe('adding and removing annotations', () => {
-        var slide;
+        let slide;
         beforeEach(() => {
             slide = new ProvenanceSlide('test1', 1, 0, ['haha'], testNode1);
         });
