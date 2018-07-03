@@ -4,13 +4,14 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import camelCase from 'lodash.camelcase';
 import typescript from 'rollup-plugin-typescript2';
 import json from 'rollup-plugin-json';
+import css from 'rollup-plugin-css-only';
 
 const pkg = require('./package.json');
 
 const libraryName = 'provenance-slide-deck';
 
 export default {
-  input: `src/${libraryName}.ts`,
+  input: `src/index.ts`,
   output: [
     {
       file: pkg.main,
@@ -36,7 +37,7 @@ export default {
     // which external modules to include in the bundle
     // https://github.com/rollup/rollup-plugin-node-resolve#usage
     resolve(),
-
+    css({ output: 'dist/bundle.css' }),
     // Resolve source maps to the original source
     sourceMaps(),
   ],

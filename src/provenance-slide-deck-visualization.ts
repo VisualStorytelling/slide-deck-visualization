@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
+const Sortable = require('sortablejs');
 
+import './style.css';
 import { ProvenanceSlidedeck } from './provenance-slide-deck';
 import { ProvenanceSlide } from './provenance-slide';
 
@@ -8,8 +10,10 @@ export class ProvenanceSlidedeckVisualization {
   private _slideDeck: ProvenanceSlidedeck;
   private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
   private static slideTemplate: (data: ProvenanceSlide) => string = data => `
-      <header>test</header>
+      <header>${data.name}</header>
       <span class="slide__name">${data.name}</span>
+      <span class="slide__delay">Delay: ${data.delay}</span>
+      <span class="slide__duration">Duration: ${data.duration}</span>
   `
 
   public update() {
@@ -21,10 +25,11 @@ export class ProvenanceSlidedeckVisualization {
 
     const newNodes = oldNodes
       .enter()
-      .append('div')
-      .attr("draggable", true);
+      .append('div');
 
     oldNodes.merge(newNodes).html(ProvenanceSlidedeckVisualization.slideTemplate);
+
+    const sortable = Sortable.create(this._root.node(), {});
   }
 
   constructor(slideDeck: ProvenanceSlidedeck, elm: HTMLDivElement) {

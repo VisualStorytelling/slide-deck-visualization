@@ -16,7 +16,8 @@
     //    "sourceRoot": "./src",
     //    "jsx": "react",
     //    "allowJs": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node"]
   },
   "include": ["src"]
 }

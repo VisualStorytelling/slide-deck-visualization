@@ -8,6 +8,9 @@ module.exports = {
     "tsx",
     "js"
   ],
+  moduleNameMapper: {
+    "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
+  },
   coveragePathIgnorePatterns: [
     "/node_modules/",
     "/test/"
