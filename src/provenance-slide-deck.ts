@@ -5,12 +5,12 @@ import { ProvenanceSlide } from './provenance-slide';
 
 export type Annotation = any;
 
-export class ProvenanceBasedSlidedeck {
+export class ProvenanceSlidedeck {
     private _slides: ProvenanceSlide[] = [];
     private traverser: ProvenanceGraphTraverser;
-    
+
     public get slides() { return this._slides; }
-    
+
     private _selectedSlide: ProvenanceSlide | null;
 
     constructor(traverser: ProvenanceGraphTraverser) {
@@ -30,21 +30,26 @@ export class ProvenanceBasedSlidedeck {
         this._slides.splice(index, 0, slide);
     }
 
-    public removeSlideAtIndex(index: number) {        
+    public removeSlideAtIndex(index: number) {
         let deletedSlides = this._slides.splice(index, 1);
-        
+
         // This can only be 1 slide now, therefore this is ok.
         if (this._selectedSlide === deletedSlides[0]) {
             this.selectedSlide = null;
         }
     }
 
-    public removeSlide(slide: ProvenanceSlide) {        
+    public removeSlide(slide: ProvenanceSlide) {
         this.removeSlideAtIndex(this._slides.indexOf(slide));
     }
 
     public get selectedSlide(): ProvenanceSlide | null {
         return this._selectedSlide;
+    }
+    public moveSlide(indexFrom: number, indexTo: number, count: number = 1) {
+        const movedSlides = this._slides.splice(indexFrom, count);
+        const newPosition = indexTo > indexFrom ? indexTo - count : indexTo;
+        this._slides.splice(newPosition, 0, ...movedSlides);
     }
 
     public set selectedSlide(value: ProvenanceSlide | null) {

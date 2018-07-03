@@ -27,7 +27,7 @@ const testNode1 = {
 
 describe('single slide', () => {
     it('should make a slide', () => {
-        let slide = new ProvenanceSlide('test1', 1, 0);
+        const slide = new ProvenanceSlide('test1', 1, 0);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
             
         expect(slide.name).toBe('test1');
@@ -38,7 +38,7 @@ describe('single slide', () => {
     });
 
     it('should make a slide with annotations and node set', () => {
-        let slide = new ProvenanceSlide('test2', 1, 0, ['haha'], testNode1);
+        const slide = new ProvenanceSlide('test2', 1, 0, ['haha'], testNode1);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
             
         expect(slide.name).toBe('test2');
