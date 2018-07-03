@@ -20,5 +20,6 @@ module.exports = {
         statements: 95
     }
   },
-  collectCoverage: true
+  collectCoverage: true,
+  globalSetup: "<rootDir>/test/global_setup_hook.js",
 };

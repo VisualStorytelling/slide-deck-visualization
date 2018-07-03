@@ -7,10 +7,8 @@ export class ProvenanceSlidedeckVisualization {
   private _slideDeck: ProvenanceSlidedeck;
   private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
   private static slideTemplate: (data: ProvenanceSlide) => string = data => `
-    <div class="slide">
+      <header>test</header>
       <span class="slide__name">${data.name}</span>
-      
-    </div>
   `
 
   public update() {
