@@ -9,7 +9,8 @@
     "quotemark": false
   },
   "rules": {
-    "semicolon": [true, "always"]
+    "semicolon": [true, "always"],
+    "indent": [true, "spaces", 4]
   },
 
   "rulesDirectory": []
