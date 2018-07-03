@@ -12,7 +12,7 @@ export type ProvenanceSlide = {
   annotations?: Annotation[];
 };
 
-export class ProvenanceBasedSlidedeck {
+export class ProvenanceSlidedeck {
   private _slides: ProvenanceSlide[] = [];
   private traverser: ProvenanceGraphTraverser;
 

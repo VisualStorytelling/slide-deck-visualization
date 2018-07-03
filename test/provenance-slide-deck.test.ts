@@ -5,13 +5,13 @@ import {
   ActionFunctionRegistry,
   ActionFunction
 } from '@visualstorytelling/provenance-core';
-import { ProvenanceBasedSlidedeck, ProvenanceSlide } from '../src/provenance-slide-deck';
+import { ProvenanceSlidedeck, ProvenanceSlide } from '../src/provenance-slide-deck';
 
 
 let graph: ProvenanceGraph;
 let tracker: ProvenanceTracker;
 let registry: ActionFunctionRegistry;
-let slideDeck: ProvenanceBasedSlidedeck;
+let slideDeck: ProvenanceSlidedeck;
 let traverser: ProvenanceGraphTraverser;
 
 const username: string = 'me';
@@ -60,12 +60,12 @@ beforeEach(() => {
   registry.register('subtract', calculator.subtract, calculator);
   tracker = new ProvenanceTracker(registry, graph, username);
   traverser = new ProvenanceGraphTraverser(registry, graph);
-  slideDeck = new ProvenanceBasedSlidedeck(traverser);
+  slideDeck = new ProvenanceSlidedeck(traverser);
 });
 
 describe('ProvenanceTreeSlidedeck', () => {
   it('makes a Slidedeck', () => {
-    expect(slideDeck).toBeInstanceOf(ProvenanceBasedSlidedeck);
+    expect(slideDeck).toBeInstanceOf(ProvenanceSlidedeck);
   });
 
   describe('insert slides', () => {
