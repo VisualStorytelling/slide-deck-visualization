@@ -12,13 +12,17 @@ export class ProvenanceSlidedeckVisualization {
   `
 
   public update() {
-    this._root
-      .classed('slidedeck', true)
+    this._root.classed('slidedeck', true);
+
+    const oldNodes = this._root
       .selectAll('div')
-      .data(this._slideDeck.slides)
+      .data(this._slideDeck.slides);
+
+    const newNodes = oldNodes
       .enter()
       .append('div')
-      .html(ProvenanceSlidedeckVisualization.slideTemplate);
+
+    oldNodes.merge(newNodes).html(ProvenanceSlidedeckVisualization.slideTemplate);
   }
 
   constructor(slideDeck: ProvenanceSlidedeck, elm: HTMLDivElement) {
