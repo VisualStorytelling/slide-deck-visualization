@@ -1,5 +1,4 @@
 import { ProvenanceSlide } from '../src/provenance-slide';
-
 import { ProvenanceNode } from '@visualstorytelling/provenance-core';
 
 const testNode1 = {
@@ -12,7 +11,7 @@ const testNode1 = {
     parent: null,
     children: [],
     artifacts: {}
-  }
+  };
 
   const testNode2 = {
     id: 'sdkljbgfoasdbfdsbvckjurebvlauwyb',
@@ -24,7 +23,7 @@ const testNode1 = {
     parent: null,
     children: [],
     artifacts: {}
-  }
+  };
 
 describe('single slide', () => {
     it('should make a slide', () => {
