@@ -1,5 +1,6 @@
 import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry } from "@visualstorytelling/provenance-core";
-import { ProvenanceBasedSlidedeck, ProvenanceSlide } from "../src/provenance-slide-deck";
+import { ProvenanceBasedSlidedeck } from "../src/provenance-slide-deck";
+import { ProvenanceSlide } from "../src/provenance-slide";
 
 
 let graph: ProvenanceGraph;
@@ -25,39 +26,28 @@ class Calculator {
 
 let calculator: Calculator;
 
-const slide: ProvenanceSlide = {
-    name: "slide 1",
-    duration: 1,
-    delay: 0
-}
-const slide2: ProvenanceSlide = {
-    name: "slide 2",
-    duration: 1,
-    delay: 0
-},
-const slide3: ProvenanceSlide = {
-    name: "slide 3",
-    duration: 1,
-    delay: 0
-}
-
-beforeEach(() => {
-    calculator = new Calculator();
-    graph = new ProvenanceGraph(
-        { name: 'calculator', version: '1.0.0' },
-        username
-    );
-    registry = new ActionFunctionRegistry();
-    registry.register('add', calculator.add, calculator);
-    registry.register('subtract', calculator.subtract, calculator);
-    tracker = new ProvenanceTracker(registry, graph, username);
-    traverser = new ProvenanceGraphTraverser(registry, graph);
-    slideDeck = new ProvenanceBasedSlidedeck(traverser);
-});
+const slide = new ProvenanceSlide('slide1', 1, 0);
+const slide2 = new ProvenanceSlide('slide2', 1, 0);
+const slide3 = new ProvenanceSlide('slide3', 1, 0);
 
 describe('ProvenanceTreeSlidedeck', () => {
+    beforeEach(() => {
+        calculator = new Calculator();
+        graph = new ProvenanceGraph(
+            { name: 'calculator', version: '1.0.0' },
+            username
+        );
+        registry = new ActionFunctionRegistry();
+        registry.register('add', calculator.add, calculator);
+        registry.register('subtract', calculator.subtract, calculator);
+        tracker = new ProvenanceTracker(registry, graph, username);
+        traverser = new ProvenanceGraphTraverser(registry, graph);
+        slideDeck = new ProvenanceBasedSlidedeck(traverser);
+    });
+
     it('makes a Slidedeck', () => {
         expect(slideDeck).toBeInstanceOf(ProvenanceBasedSlidedeck);
+        expect(slideDeck.slides).toHaveLength(0);
     });
 
     describe('insert slides', () => {
@@ -96,6 +86,45 @@ describe('ProvenanceTreeSlidedeck', () => {
         it('should remove at slide from argument', () => {
             slideDeck.removeSlide(slide2);
             expect(slideDeck.slides).toEqual([slide, slide3]);
-        })
+        });
+    });
+
+    describe('selected slide', () => {
+        it('initially has a null selection', () => {
+            expect(slideDeck.selectedSlide).toEqual(null);
+        });
+
+        it('has a selected slide when a slide is added', () => {
+            slideDeck.addSlide(slide);
+            expect(slideDeck.selectedSlide).toBeInstanceOf(ProvenanceSlide);
+        });
+        
+        describe('and deleting slides', () => {
+            beforeEach(() => {
+                slideDeck.addSlide(slide);
+                slideDeck.addSlide(slide2);
+                slideDeck.addSlide(slide3);
+            });
+
+            it('does not change the selected slide automatically after the first is added', () => {            
+                expect(slideDeck.selectedSlide).toBe(slide);
+            });
+
+            it('can select another slide', () => {
+                slideDeck.selectedSlide = slide3;
+                expect(slideDeck.selectedSlide).toBe(slide3);
+            });
+
+            it('can delete a slide', () => {
+                slideDeck.removeSlide(slide3);
+                expect(slideDeck.slides).not.toContain(slide3);
+            });
+
+            it('resets the selection to null if a selected slide is deleted', () => {
+                slideDeck.selectedSlide = slide3;
+                slideDeck.removeSlide(slide3);
+                expect(slideDeck.selectedSlide).toBe(null);
+            });
+        });
     });
 });
