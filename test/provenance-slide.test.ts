@@ -5,31 +5,31 @@ const testNode1 = {
     id: 'sdkljbgfoasdbfdsbvckjurebvlauwyb',
     label: 'Some node',
     metadata: {
-      createdBy: 'me',
-      createdOn: 123456
+        createdBy: 'me',
+        createdOn: 123456
     },
     parent: null,
     children: [],
     artifacts: {}
-  };
+};
 
-  const testNode2 = {
+const testNode2 = {
     id: 'sdkljbgfoasdbfdsbvckjurebvlauwyb',
     label: 'Some node',
     metadata: {
-      createdBy: 'me',
-      createdOn: 123456
+        createdBy: 'me',
+        createdOn: 123456
     },
     parent: null,
     children: [],
     artifacts: {}
-  };
+};
 
 describe('single slide', () => {
     it('should make a slide', () => {
         const slide = new ProvenanceSlide('test1', 1, 0);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
-            
+
         expect(slide.name).toBe('test1');
         expect(slide.duration).toBe(1);
         expect(slide.delay).toBe(0);
@@ -40,7 +40,7 @@ describe('single slide', () => {
     it('should make a slide with annotations and node set', () => {
         const slide = new ProvenanceSlide('test2', 1, 0, ['haha'], testNode1);
         expect(slide).toBeInstanceOf(ProvenanceSlide);
-            
+
         expect(slide.name).toBe('test2');
         expect(slide.duration).toBe(1);
         expect(slide.delay).toBe(0);
@@ -88,19 +88,19 @@ describe('single slide', () => {
         describe('add annotations', () => {
             it('can add an annotation', () => {
                 expect(slide.annotations[0]).toEqual('haha');
-                slide.addAnnotation('shiny!');                
+                slide.addAnnotation('shiny!');
                 expect(slide.annotations[0]).toEqual('haha');
                 expect(slide.annotations[1]).toEqual('shiny!');
             });
         });
-    
+
         describe('can remove an annotation', () => {
             beforeEach(() => {
                 slide.addAnnotation('shiny!');
                 slide.addAnnotation('awesome!');
                 slide.addAnnotation('insight!');
             });
-    
+
             it('should remove the slide', () => {
                 expect(slide.annotations).toEqual(['haha', 'shiny!', 'awesome!', 'insight!']);
                 slide.removeAnnotation('awesome!');

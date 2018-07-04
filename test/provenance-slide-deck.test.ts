@@ -26,9 +26,22 @@ class Calculator {
 
 let calculator: Calculator;
 
+const testNode1 = {
+    id: 'sdkljbgfoasdbfdsbvckjurebvlauwyb',
+    label: 'Some node',
+    metadata: {
+      createdBy: 'me',
+      createdOn: 123456
+    },
+    parent: null,
+    children: [],
+    artifacts: {}
+  };
+
 const slide = new ProvenanceSlide('slide1', 1, 0);
 const slide2 = new ProvenanceSlide('slide2', 1, 0);
 const slide3 = new ProvenanceSlide('slide3', 1, 0);
+const slideWithNode = new ProvenanceSlide('slideWithNode', 1, 0, [], testNode1);
 
 describe('ProvenanceTreeSlidedeck', () => {
     beforeEach(() => {
@@ -48,6 +61,37 @@ describe('ProvenanceTreeSlidedeck', () => {
     it('makes a Slidedeck', () => {
         expect(slideDeck).toBeInstanceOf(ProvenanceSlidedeck);
         expect(slideDeck.slides).toHaveLength(0);
+    });
+
+    describe('add slides', () => {
+        describe('add slides', () => {
+            it('should add a slide to an empty deck', () => {
+                slideDeck.addSlide(slide);
+                expect(slideDeck.slides).toEqual([slide]);
+            });
+        });
+
+        describe('add slides to decks with slides', () => {
+            beforeEach(() => {
+                slideDeck.addSlide(slide);
+                slideDeck.addSlide(slide3);
+            });
+
+            it('should add a slide at the end by default', () => {
+                slideDeck.addSlide(slide2);
+                expect(slideDeck.slides).toEqual([slide, slide3, slide2]);
+            });
+
+            it('should add a slide at index', () => {
+                slideDeck.addSlide(slide2, 1);
+                expect(slideDeck.slides).toEqual([slide, slide2, slide3]);
+            });
+
+            it('should add a slide at the end if the index is nonsense', () => {
+                slideDeck.addSlide(slide2, NaN);
+                expect(slideDeck.slides).toEqual([slide, slide3, slide2]);
+            });
+        });
     });
 
     describe('remove slides', () => {
@@ -78,7 +122,29 @@ describe('ProvenanceTreeSlidedeck', () => {
             expect(slideDeck.selectedSlide).toBeInstanceOf(ProvenanceSlide);
         });
 
-        describe('and deleting slides', () => {
+
+        describe('selecting slides', () => {
+            beforeEach(() => {
+                slideDeck.addSlide(slide);
+                slideDeck.addSlide(slideWithNode);
+                slideDeck.addSlide(slide3);
+            });
+
+            it('can select another slide', () => {
+                slideDeck.selectedSlide = slide3;
+                expect(slideDeck.selectedSlide).toBe(slide3);
+            });
+
+            it('has signaled the traverser to change the slide when another is selected', () => {  
+                slideDeck.selectedSlide = slide;     
+                const spiedfunc = jest.spyOn(traverser, "toStateNode");
+                slideDeck.selectedSlide = slideWithNode;
+                expect(spiedfunc).toHaveBeenCalledWith(slideWithNode.node.id);
+            });
+
+        });
+
+        describe('deleting slides', () => {
             beforeEach(() => {
                 slideDeck.addSlide(slide);
                 slideDeck.addSlide(slide2);
@@ -87,11 +153,6 @@ describe('ProvenanceTreeSlidedeck', () => {
 
             it('does not change the selected slide automatically after the first is added', () => {
                 expect(slideDeck.selectedSlide).toBe(slide);
-            });
-
-            it('can select another slide', () => {
-                slideDeck.selectedSlide = slide3;
-                expect(slideDeck.selectedSlide).toBe(slide3);
             });
 
             it('can delete a slide', () => {
