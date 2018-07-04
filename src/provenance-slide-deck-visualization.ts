@@ -27,8 +27,7 @@ export class ProvenanceSlidedeckVisualization {
 
     const newNodes = oldNodes
       .enter()
-      .append('div')
-      .classed('slidedeck__slide', true);
+      .append('div');
 
     oldNodes.merge(newNodes).html(ProvenanceSlidedeckVisualization.slideTemplate);
 
