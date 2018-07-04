@@ -44,6 +44,7 @@ class ProvenanceSlidedeck {
     public get selectedSlide(): ProvenanceSlide | null {
         return this._selectedSlide;
     }
+    
     public moveSlide(indexFrom: number, indexTo: number, count: number = 1) {
         const movedSlides = this._slides.splice(indexFrom, count);
         const newPosition = indexTo > indexFrom ? indexTo - count : indexTo;

@@ -64,7 +64,7 @@ describe('ProvenanceTreeSlidedeck', () => {
 
   it('should render all slides', () => {
     const vis = new ProvenanceSlidedeckVisualization(slideDeck, visRoot);
-    expect(visRoot.children).toHaveLength(slideDeck.slides.length);
+    expect(visRoot.children[0].children).toHaveLength(slideDeck.slides.length);
   });
 
 
