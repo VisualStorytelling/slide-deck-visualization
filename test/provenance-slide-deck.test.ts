@@ -1,6 +1,7 @@
-import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry } from "@visualstorytelling/provenance-core";
+import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry, Handler } from "@visualstorytelling/provenance-core";
 import { ProvenanceSlidedeck } from "../src/provenance-slide-deck";
 import { ProvenanceSlide } from "../src/provenance-slide";
+import Mock = jest.Mock;
 
 let graph: ProvenanceGraph;
 let tracker: ProvenanceTracker;
@@ -30,13 +31,13 @@ const testNode1 = {
     id: 'sdkljbgfoasdbfdsbvckjurebvlauwyb',
     label: 'Some node',
     metadata: {
-      createdBy: 'me',
-      createdOn: 123456
+        createdBy: 'me',
+        createdOn: 123456
     },
     parent: null,
     children: [],
     artifacts: {}
-  };
+};
 
 const slide = new ProvenanceSlide('slide1', 1, 0);
 const slide2 = new ProvenanceSlide('slide2', 1, 0);
@@ -61,6 +62,7 @@ describe('ProvenanceTreeSlidedeck', () => {
     it('makes a Slidedeck', () => {
         expect(slideDeck).toBeInstanceOf(ProvenanceSlidedeck);
         expect(slideDeck.slides).toHaveLength(0);
+        expect(slideDeck.application).toBeDefined();
     });
 
     describe('add slides', () => {
@@ -68,6 +70,17 @@ describe('ProvenanceTreeSlidedeck', () => {
             it('should add a slide to an empty deck', () => {
                 slideDeck.addSlide(slide);
                 expect(slideDeck.slides).toEqual([slide]);
+            });
+            it('should add a slide with the current node if no slide is given', () => {
+                const slideCreated = slideDeck.addSlide();
+                expect(slideDeck.slides).toEqual([slideCreated]);
+                expect(slideCreated.node).toEqual(graph.current);
+            });
+            it('will dispatch on slide addition', () => {
+                const listener = jest.fn();
+                slideDeck.on('slideAdded', listener);
+                slideDeck.addSlide(slide);
+                expect(listener).toHaveBeenCalled();
             });
         });
 
@@ -110,6 +123,19 @@ describe('ProvenanceTreeSlidedeck', () => {
             slideDeck.removeSlide(slide2);
             expect(slideDeck.slides).toEqual([slide, slide3]);
         });
+
+        it('resets the selection to null if a selected slide is deleted', () => {
+            slideDeck.selectedSlide = slide3;
+            slideDeck.removeSlide(slide3);
+            expect(slideDeck.selectedSlide).toBe(null);
+        });
+
+        it('will dispatch on slide removal', () => {
+            const listener = jest.fn();
+            slideDeck.on('slideRemoved', listener);
+            slideDeck.removeSlide(slide);
+            expect(listener).toHaveBeenCalled();
+        });
     });
 
     describe('selected slide', () => {
@@ -135,35 +161,18 @@ describe('ProvenanceTreeSlidedeck', () => {
                 expect(slideDeck.selectedSlide).toBe(slide3);
             });
 
-            it('has signaled the traverser to change the slide when another is selected', () => {  
-                slideDeck.selectedSlide = slide;     
-                const spiedfunc = jest.spyOn(traverser, "toStateNode");
+            it('has signaled the traverser to change the slide when another is selected', () => {
+                slideDeck.selectedSlide = slide;
+                const spiedfunc = jest.spyOn(traverser, 'toStateNode');
                 slideDeck.selectedSlide = slideWithNode;
                 expect(spiedfunc).toHaveBeenCalledWith(slideWithNode.node.id);
             });
 
-        });
-
-        describe('deleting slides', () => {
-            beforeEach(() => {
-                slideDeck.addSlide(slide);
-                slideDeck.addSlide(slide2);
-                slideDeck.addSlide(slide3);
-            });
-
-            it('does not change the selected slide automatically after the first is added', () => {
-                expect(slideDeck.selectedSlide).toBe(slide);
-            });
-
-            it('can delete a slide', () => {
-                slideDeck.removeSlide(slide3);
-                expect(slideDeck.slides).not.toContain(slide3);
-            });
-
-            it('resets the selection to null if a selected slide is deleted', () => {
-                slideDeck.selectedSlide = slide3;
-                slideDeck.removeSlide(slide3);
-                expect(slideDeck.selectedSlide).toBe(null);
+            it('will dispatch on slide selection', () => {
+                const listener = jest.fn();
+                slideDeck.on('slideSelected', listener);
+                slideDeck.selectedSlide = slide;
+                expect(listener).toHaveBeenCalled();
             });
         });
     });
@@ -200,5 +209,15 @@ describe('ProvenanceTreeSlidedeck', () => {
             expect(slideDeck.slides[1]).toBe(slide3);
             expect(slideDeck.slides[2]).toBe(slide);
         });
+    });
+
+    describe('Event listener', () => {
+      let listener: Mock<Handler> = jest.fn();
+      
+      it('can remove listener', () => {
+        slideDeck.off('slideAdded', listener);
+        slideDeck.addSlide(slide);
+        expect(listener).not.toHaveBeenCalled();
+      });
     });
 });

@@ -3,8 +3,6 @@ const Sortable = require('sortablejs');
 
 import './style.css';
 import { IProvenanceSlide, IProvenanceSlidedeck } from './api';
-import { ProvenanceSlide } from './provenance-slide-deck';
-import { IProvenanceGraph } from '@visualstorytelling/provenance-core';
 
 export class ProvenanceSlidedeckVisualization {
   private _slideDeck: IProvenanceSlidedeck;
@@ -38,8 +36,9 @@ export class ProvenanceSlidedeckVisualization {
       .text((data: IProvenanceSlide) => { return data.delay; });
     tableRow.append('td').attr('class', 'slide__duration')
       .text((data: IProvenanceSlide) => { return data.duration; });
-    const deleteButton = tableRow.append('td').attr('class', 'slide__delete')
+    const deleteButton = tableRow.append('td').attr('class', 'slide__delete')      
       .append<HTMLButtonElement>('button')
+      .attr('id', (data: IProvenanceSlide) => {return 'delete_' + data.id; })
       .text('delete');
     deleteButton.on('click', this.onDelete);
 

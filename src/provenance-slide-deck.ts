@@ -24,7 +24,7 @@ class ProvenanceSlidedeck implements IProvenanceSlidedeck {
         return this._application;
     }
 
-    public addSlide(slide?: IProvenanceSlide, index?: number) {
+    public addSlide(slide?: IProvenanceSlide, index?: number): IProvenanceSlide {
         if (!index || isNaN(index) || !Number.isInteger(index) || index > this._slides.length || index < 0) {
             index = this._slides.length;
         }
@@ -38,6 +38,8 @@ class ProvenanceSlidedeck implements IProvenanceSlidedeck {
         }
         this._slides.splice(index, 0, slide);
         this._mitt.emit('slideAdded', slide);
+
+        return slide;
     }
 
     public removeSlideAtIndex(index: number) {

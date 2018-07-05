@@ -2,6 +2,7 @@ import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFun
 import { ProvenanceSlidedeck } from "../src/provenance-slide-deck";
 import { ProvenanceSlide } from "../src/provenance-slide";
 import { ProvenanceSlidedeckVisualization } from '../src/provenance-slide-deck-visualization';
+import * as d3 from 'd3';
 
 let graph: ProvenanceGraph;
 let tracker: ProvenanceTracker;
@@ -55,7 +56,6 @@ describe('ProvenanceTreeSlidedeck', () => {
     slideDeck.addSlide(slide);
     slideDeck.addSlide(slide2);
     slideDeck.addSlide(slide3);
-
   });
 
   it('should render without crashing', () => {
@@ -67,5 +67,28 @@ describe('ProvenanceTreeSlidedeck', () => {
     expect(visRoot.children[0].children).toHaveLength(slideDeck.slides.length);
   });
 
+  describe('event listeners', () => {
+    let vis: ProvenanceSlidedeckVisualization;
+    beforeEach(() => {
+      vis = new ProvenanceSlidedeckVisualization(slideDeck, visRoot);
+    });
 
+    it('should have a working onDelete listener', () => {
+      expect(vis).toHaveProperty('onDelete');
+
+      // const spiedfunc = jest.spyOn(slideDeck, 'removeSlide');
+      // const deleteButton = document.getElementById('delete_' + slide.id) as HTMLButtonElement;
+
+      // deleteButton.click();
+      
+      // expect(spiedfunc).toHaveBeenCalledWith(slide);
+    });
+
+    it('should have an onAdd listener', () => {
+      expect(vis).toHaveProperty('onAdd');
+    });
+    it('should have an onSelect listener', () => {
+      expect(vis).toHaveProperty('onSelect');
+    });
+  });
 });

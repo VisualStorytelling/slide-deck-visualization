@@ -1,12 +1,17 @@
-import { ProvenanceNode } from '@visualstorytelling/provenance-core';
+import { ProvenanceNode, generateUUID } from '@visualstorytelling/provenance-core';
 import { IProvenanceSlide, Annotation } from './api';
 
 export class ProvenanceSlide implements IProvenanceSlide {
+    private _id: string;
     private _node: ProvenanceNode | null;
     private _name: string;
     private _duration: number;
     private _delay: number;
     private _annotations: Annotation[];
+
+    public get id(): string {
+        return this._id;
+    }
 
     public get node(): ProvenanceNode | null {
         return this._node;
@@ -54,6 +59,7 @@ export class ProvenanceSlide implements IProvenanceSlide {
     }
 
     constructor(name: string, duration: number, delay: number, annotations: Annotation[] = [], node: (ProvenanceNode | null) = null) {
+        this._id = generateUUID();
         this._name = name;
         this._duration = duration;
         this._delay = delay;

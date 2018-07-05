@@ -3,6 +3,7 @@ import ProvenanceAPI from '@visualstorytelling/provenance-core';
 export type Annotation = any;
 
 export interface IProvenanceSlide {
+    id: string;
     node: ProvenanceAPI.ProvenanceNode | null;    
     name: string;
     duration: number;    
@@ -21,7 +22,7 @@ export interface IProvenanceSlidedeck {
     slides: IProvenanceSlide[];
     selectedSlide: IProvenanceSlide | null;
 
-    addSlide(slide?: IProvenanceSlide, index?: number): void;
+    addSlide(slide?: IProvenanceSlide, index?: number): IProvenanceSlide;
     removeSlide(slide: IProvenanceSlide): void;
     removeSlideAtIndex(index: number): void;
     moveSlide(indexFrom: number, indexTo: number, count?: number): void;
