@@ -1,10 +1,7 @@
-export const bla = 'bla';
+import { ProvenanceNode } from '@visualstorytelling/provenance-core';
+import { IProvenanceSlide, Annotation } from './api';
 
-import { ProvenanceNode, ProvenanceGraphTraverser } from '@visualstorytelling/provenance-core';
-
-export type Annotation = any;
-
-export class ProvenanceSlide {
+export class ProvenanceSlide implements IProvenanceSlide {
     private _node: ProvenanceNode | null;
     private _name: string;
     private _duration: number;

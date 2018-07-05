@@ -55,7 +55,7 @@ describe('ProvenanceTreeSlidedeck', () => {
         registry.register('subtract', calculator.subtract, calculator);
         tracker = new ProvenanceTracker(registry, graph, username);
         traverser = new ProvenanceGraphTraverser(registry, graph);
-        slideDeck = new ProvenanceSlidedeck(traverser);
+        slideDeck = new ProvenanceSlidedeck({ name: 'calculator', version: '1.0.0' }, traverser);
     });
 
     it('makes a Slidedeck', () => {

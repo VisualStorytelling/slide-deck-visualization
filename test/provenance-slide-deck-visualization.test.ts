@@ -51,7 +51,7 @@ describe('ProvenanceTreeSlidedeck', () => {
     tracker = new ProvenanceTracker(registry, graph, username);
     traverser = new ProvenanceGraphTraverser(registry, graph);
 
-    slideDeck = new ProvenanceSlidedeck(traverser);
+    slideDeck = new ProvenanceSlidedeck({ name: 'calculator', version: '1.0.0' }, traverser);
     slideDeck.addSlide(slide);
     slideDeck.addSlide(slide2);
     slideDeck.addSlide(slide3);
