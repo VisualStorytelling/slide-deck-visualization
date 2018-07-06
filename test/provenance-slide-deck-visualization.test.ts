@@ -41,6 +41,8 @@ const visRoot = document.getElementById('vis') as HTMLDivElement;
 
 describe('ProvenanceTreeSlidedeck', () => {
   beforeEach(() => {
+    visRoot.innerHTML = '';
+
     calculator = new Calculator();
     graph = new ProvenanceGraph(
       { name: 'calculator', version: '1.0.0' },
