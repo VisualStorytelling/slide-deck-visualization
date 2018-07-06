@@ -77,7 +77,7 @@ export class ProvenanceSlidedeckVisualization {
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
         this._slideDeck = slideDeck;
         this._root = d3.select(elm);
-        this._slideTable = this._root.append<HTMLTableElement>('table').attr('class', 'slide__table');
+        this._slideTable = this._root.append<HTMLTableElement>('table').attr('class', 'slides__table');
         slideDeck.on('slideAdded', () => this.update());
         slideDeck.on('slideRemoved', () => this.update());
         slideDeck.on('slidesMoved', () => this.update());

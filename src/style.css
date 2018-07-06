@@ -8,7 +8,7 @@ table.slides__table {
     width: 300px;
 }
 
-table.slide__table tr.selected {
+table.slides__table tr.selected {
     background-color: #00b8d9;
 }
 
