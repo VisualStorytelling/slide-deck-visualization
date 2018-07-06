@@ -39,7 +39,10 @@
   },
   "devDependencies": {
     "@types/d3": "^5.0.0",
+    "@types/d3-drag": "^1.2.1",
     "@types/d3-hierarchy": "^1.1.2",
+    "@types/d3-scale": "^2.0.1",
+    "@types/d3-selection-multi": "^1.0.6",
     "@types/jest": "^23.1.4",
     "@types/jsdom": "^11.0.6",
     "@types/node": "^10.5.1",
@@ -74,6 +77,8 @@
   "dependencies": {
     "d3": "^5.4.0",
     "d3-drag": "^1.2.1",
-    "d3-hierarchy": "^1.1.6"
+    "d3-hierarchy": "^1.1.6",
+    "d3-scale": "^2.1.0",
+    "d3-selection-multi": "^1.0.1"
   }
 }
