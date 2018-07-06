@@ -36,22 +36,23 @@ export class ProvenanceSlidedeckVisualization {
 
     public update() {
         const oldNodes = this._slideTable
-            .selectAll('tr')
-            .data(this._slideDeck.slides);
+          .selectAll('tr')
+            .data(this._slideDeck.slides)
+            .attr('id', (data: IProvenanceSlide) => data.id);
 
-        const newNodes = oldNodes.enter();
+
+      const newNodes = oldNodes.enter();
 
         const tableRow = newNodes.append('tr')
-            .on('click', this.onSelect);
+          .on('click', this.onSelect);
         tableRow.append('td').attr('class', 'slide__name')
-            .text((data: IProvenanceSlide) => { return data.name; });
+            .text((data: IProvenanceSlide) => data.name);
         tableRow.append('td').attr('class', 'slide__delay')
-            .text((data: IProvenanceSlide) => { return data.delay; });
+            .text((data: IProvenanceSlide) => data.delay);
         tableRow.append('td').attr('class', 'slide__duration')
-            .text((data: IProvenanceSlide) => { return data.duration; });
+            .text((data: IProvenanceSlide) => data.duration);
         const deleteButton = tableRow.append('td').attr('class', 'slide__delete')
             .append<HTMLButtonElement>('button')
-            .attr('id', (data: IProvenanceSlide) => { return 'delete_' + data.id; })
             .text('delete');
         deleteButton.on('click', this.onDelete);
 
