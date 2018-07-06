@@ -3,6 +3,7 @@ import mitt from './mitt';
 import { IProvenanceSlidedeck, IProvenanceSlide, Annotation } from './api';
 import { ProvenanceSlide} from './provenance-slide';
 
+
 class ProvenanceSlidedeck implements IProvenanceSlidedeck {
     private _application: Application;
     private _graph: IProvenanceGraph;

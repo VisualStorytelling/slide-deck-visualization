@@ -75,13 +75,10 @@ describe('ProvenanceTreeSlidedeck', () => {
 
     it('should have a working onDelete listener', () => {
       expect(vis).toHaveProperty('onDelete');
-
-      // const spiedfunc = jest.spyOn(slideDeck, 'removeSlide');
-      // const deleteButton = document.getElementById('delete_' + slide.id) as HTMLButtonElement;
-
-      // deleteButton.click();
-      
-      // expect(spiedfunc).toHaveBeenCalledWith(slide);
+      const spiedfunc = jest.spyOn(slideDeck, 'removeSlide');
+      const deleteButton = document.getElementById('delete_' + slide.id) as HTMLButtonElement;
+      deleteButton.dispatchEvent(new Event('click'));
+      expect(spiedfunc).toHaveBeenCalledWith(slide);
     });
 
     it('should have an onAdd listener', () => {

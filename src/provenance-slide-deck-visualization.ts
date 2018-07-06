@@ -1,64 +1,80 @@
 import * as d3 from 'd3';
-const Sortable = require('sortablejs');
 
 import './style.css';
 import { IProvenanceSlide, IProvenanceSlidedeck } from './api';
 
+
+
 export class ProvenanceSlidedeckVisualization {
-  private _slideDeck: IProvenanceSlidedeck;
-  private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
-  private _slideTable: d3.Selection<HTMLTableElement, any, null, undefined>;
+    private _slideDeck: IProvenanceSlidedeck;
+    private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
+    private _slideTable: d3.Selection<HTMLTableElement, any, null, undefined>;
 
-  private onDelete = (slide: IProvenanceSlide) => {
-    this._slideDeck.removeSlide(slide);
-  }
+    private onDelete = (slide: IProvenanceSlide) => {
+        this._slideDeck.removeSlide(slide);
+    }
 
-  private onSelect = (slide: IProvenanceSlide) => {
-    this._slideDeck.selectedSlide = slide;
-  }
+    private onSelect = (slide: IProvenanceSlide) => {
+        this._slideDeck.selectedSlide = slide;
+    }
 
-  private onAdd = () => {
-    this._slideDeck.addSlide();
-  }
+    private onAdd = () => {
+        this._slideDeck.addSlide();
+    }
 
-  public update() {
-    const oldNodes = this._slideTable
-      .selectAll('tr')
-      .data(this._slideDeck.slides);
+    // private dragstarted(draggedObject: d3.Selection<HTMLElement, any, null, undefined>) {
+    //     this._slideTable.raise().classed("active", true);
+    // }
+    
+    // private dragged(draggedObject: d3.Selection<HTMLElement, any, null, undefined>) {
+    //     this._slideTable.attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+    // }
+    
+    // private dragended(draggedObject: d3.Selection<HTMLElement, any, null, undefined>) {
+    //     d3.select(this).classed("active", false);
+    // }
 
-    const newNodes = oldNodes.enter();
+    public update() {
+        const oldNodes = this._slideTable
+            .selectAll('tr')
+            .data(this._slideDeck.slides);
 
-    const tableRow = newNodes.append('tr')
-      .on('click', this.onSelect);
-    tableRow.append('td').attr('class', 'slide__name')
-      .text((data: IProvenanceSlide) => { return data.name; });
-    tableRow.append('td').attr('class', 'slide__delay')
-      .text((data: IProvenanceSlide) => { return data.delay; });
-    tableRow.append('td').attr('class', 'slide__duration')
-      .text((data: IProvenanceSlide) => { return data.duration; });
-    const deleteButton = tableRow.append('td').attr('class', 'slide__delete')      
-      .append<HTMLButtonElement>('button')
-      .attr('id', (data: IProvenanceSlide) => {return 'delete_' + data.id; })
-      .text('delete');
-    deleteButton.on('click', this.onDelete);
+        const newNodes = oldNodes.enter();
 
-    oldNodes.exit().remove();
+        const tableRow = newNodes.append('tr')
+            .on('click', this.onSelect);
+        tableRow.append('td').attr('class', 'slide__name')
+            .text((data: IProvenanceSlide) => { return data.name; });
+        tableRow.append('td').attr('class', 'slide__delay')
+            .text((data: IProvenanceSlide) => { return data.delay; });
+        tableRow.append('td').attr('class', 'slide__duration')
+            .text((data: IProvenanceSlide) => { return data.duration; });
+        const deleteButton = tableRow.append('td').attr('class', 'slide__delete')
+            .append<HTMLButtonElement>('button')
+            .attr('id', (data: IProvenanceSlide) => { return 'delete_' + data.id; })
+            .text('delete');
+        deleteButton.on('click', this.onDelete);
 
-    const sortable = Sortable.create(this._slideTable.node(), {});
-  }
+        // tableRow.call(d3.drag()
+        //     .on('start', dragstarted)
+        //     .on('drag', dragged)
+        //     .on('end', dragended));
 
-  constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
-    this._slideDeck = slideDeck;
-    this._root = d3.select(elm);
-    this._slideTable = this._root.append<HTMLTableElement>('table').attr('class', 'slide__table');
-    slideDeck.on('slideAdded', () => this.update());
-    slideDeck.on('slideRemoved', () => this.update());
-    slideDeck.on('slidesMoved', () => this.update());
-    slideDeck.on('slideSelected', () => this.update());
+        oldNodes.exit().remove();
+    }
 
-    const addSlideButton = this._root.append<HTMLButtonElement>('button').text('add slide');
-    addSlideButton.on('click', this.onAdd);
+    constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
+        this._slideDeck = slideDeck;
+        this._root = d3.select(elm);
+        this._slideTable = this._root.append<HTMLTableElement>('table').attr('class', 'slide__table');
+        slideDeck.on('slideAdded', () => this.update());
+        slideDeck.on('slideRemoved', () => this.update());
+        slideDeck.on('slidesMoved', () => this.update());
+        slideDeck.on('slideSelected', () => this.update());
 
-    this.update();
-  }
+        const addSlideButton = this._root.append<HTMLButtonElement>('button').text('add slide');
+        addSlideButton.on('click', this.onAdd);
+
+        this.update();
+    }
 }
