@@ -28,9 +28,11 @@ class Calculator {
 
 let calculator: Calculator;
 
-const slide = new ProvenanceSlide('slide1', 1, 0);
+const slide1 = new ProvenanceSlide('slide1', 1, 0);
 const slide2 = new ProvenanceSlide('slide2', 1, 0);
 const slide3 = new ProvenanceSlide('slide3', 1, 0);
+
+const slides = [slide1, slide2, slide3];
 
 const body = document.body;
 body.innerHTML = `
@@ -55,7 +57,7 @@ describe('ProvenanceTreeSlidedeck', () => {
     traverser = new ProvenanceGraphTraverser(registry, graph);
 
     slideDeck = new ProvenanceSlidedeck({ name: 'calculator', version: '1.0.0' }, traverser);
-    slideDeck.addSlide(slide);
+    slideDeck.addSlide(slide1);
     slideDeck.addSlide(slide2);
     slideDeck.addSlide(slide3);
   });
@@ -78,16 +80,24 @@ describe('ProvenanceTreeSlidedeck', () => {
     it('should have a working onDelete listener', () => {
       expect(vis).toHaveProperty('onDelete');
       const spiedfunc = jest.spyOn(slideDeck, 'removeSlide');
-      const deleteButton = document.getElementById('delete_' + slide.id) as HTMLButtonElement;
+      const deleteButton = document.querySelector(`tr[id="${slide1.id}"]>.slide__delete>button`) as HTMLButtonElement;
       deleteButton.dispatchEvent(new Event('click'));
-      expect(spiedfunc).toHaveBeenCalledWith(slide);
+      expect(spiedfunc).toHaveBeenCalledWith(slide1);
+    });
+
+    test.each([1, 2, 3])('selects slide (slide %i)', (i) => {
+      expect(vis).toHaveProperty('onSelect');
+      const slide = slides[i-1];
+      const slideElm = document.querySelector(`.slides__table>tr[id="${slide.id}"]`) as HTMLTableRowElement;
+      slideElm.dispatchEvent(new Event('click'));
+      expect(slideDeck.selectedSlide).toBe(slide);
+      expect(slideElm.classList.contains('selected')).toBeTruthy();
+      // expect(slideDeck.graph.current).toBe(slide.node);
     });
 
     it('should have an onAdd listener', () => {
       expect(vis).toHaveProperty('onAdd');
-    });
-    it('should have an onSelect listener', () => {
-      expect(vis).toHaveProperty('onSelect');
+
     });
   });
 });

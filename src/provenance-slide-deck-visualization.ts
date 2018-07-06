@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 
 import './style.css';
 import { IProvenanceSlide, IProvenanceSlidedeck } from './api';
+import { ProvenanceSlide } from "./provenance-slide";
 
 
 
@@ -19,7 +20,14 @@ export class ProvenanceSlidedeckVisualization {
     }
 
     private onAdd = () => {
-        this._slideDeck.addSlide();
+      let slideDeck = this._slideDeck;
+      const node = slideDeck.graph.current;
+      const slide = new ProvenanceSlide(node.label, 1000, 0, [], node);
+      slideDeck.addSlide(slide,
+        slideDeck.selectedSlide
+        ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
+        : slideDeck.slides.length
+      );
     }
 
     // private dragstarted(draggedObject: d3.Selection<HTMLElement, any, null, undefined>) {
@@ -36,21 +44,23 @@ export class ProvenanceSlidedeckVisualization {
 
     public update() {
         const oldNodes = this._slideTable
-          .selectAll('tr')
-            .data(this._slideDeck.slides)
-            .attr('id', (data: IProvenanceSlide) => data.id);
+            .selectAll('tr')
+            .data(this._slideDeck.slides, (d: any) => d.id);
+
+        const newNodes = oldNodes.enter().append('tr');
+
+        oldNodes.merge(newNodes).classed('selected', data => this._slideDeck.selectedSlide === data)
+          .attr('id', data => data.id);
 
 
-      const newNodes = oldNodes.enter();
-
-        const tableRow = newNodes.append('tr')
-          .on('click', this.onSelect);
+      const tableRow = newNodes
+            .on('click', this.onSelect);
         tableRow.append('td').attr('class', 'slide__name')
-            .text((data: IProvenanceSlide) => data.name);
+            .text(data => data.name);
         tableRow.append('td').attr('class', 'slide__delay')
-            .text((data: IProvenanceSlide) => data.delay);
+            .text(data => data.delay);
         tableRow.append('td').attr('class', 'slide__duration')
-            .text((data: IProvenanceSlide) => data.duration);
+            .text(data => data.duration);
         const deleteButton = tableRow.append('td').attr('class', 'slide__delete')
             .append<HTMLButtonElement>('button')
             .text('delete');

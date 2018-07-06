@@ -79,6 +79,8 @@ class ProvenanceSlidedeck implements IProvenanceSlidedeck {
 
     public get slides() { return this._slides; }
 
+    public get graph() { return this._graph; }
+
     on(type: string, handler: Handler) {
         this._mitt.on(type, handler);
     }
@@ -90,3 +92,4 @@ class ProvenanceSlidedeck implements IProvenanceSlidedeck {
 
 export { ProvenanceSlidedeck, ProvenanceSlide, Annotation };
 export { ProvenanceSlidedeckVisualization } from './provenance-slide-deck-visualization';
+export { ProvenanceSlidePlayer } from './provenance-slide-player';
