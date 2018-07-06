@@ -31,6 +31,10 @@ export class ProvenanceSlidePlayer<T extends ISlide> {
         return this._slides;
     }
 
+    public get currentSlideIndex() {
+        return this._currentSlideIndex;
+    }
+
     public async play() {
         const shouldPlayNext = () => (
           this._status === STATUS.PLAYING &&
@@ -48,6 +52,10 @@ export class ProvenanceSlidePlayer<T extends ISlide> {
             } while (shouldPlayNext());
         }
         this._status = STATUS.IDLE;
+    }
+
+    public get status() {
+        return this._status;
     }
 
     public stop() {
