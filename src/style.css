@@ -12,7 +12,34 @@ table.slides__table tr.selected {
     background-color: #00b8d9;
 }
 
-
 div.slidedeck__slide[draggable=true] {
     background-color: #00b8d9;
+}
+
+.slides_background_rect {
+    fill: #ffffff;
+    stroke: #aaaaaa;
+}
+
+.slides_delay_rect {
+    fill: #dddddd;
+    stroke: #dddddd;
+}
+
+.slides_rect {
+    fill: #aaaaaa;
+    stroke: #dddddd;
+}
+
+.slides_rect[selected=true] {
+    fill: #00b8d9;
+    stroke: #dddddd;
+}
+
+.slides_text {
+    fill: #000000;
+}
+
+.slides_delete_rect {
+    fill: #000000;
 }

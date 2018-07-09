@@ -28,8 +28,11 @@ export interface IProvenanceSlidedeck {
     removeSlideAtIndex(index: number): void;
     moveSlide(indexFrom: number, indexTo: number, count?: number): void;
 
+    startTime(slide: IProvenanceSlide): number;
+    slideAtTime(time: number): IProvenanceSlide | null;
+    
     /**
-     * Available events:
+     * Available events: 
      * * slideAdded, emitted when slide is added via this.addSlide()
      * * slideSelected, emitted when this.selectedSlide is changed
      * * slidesMoved, emitted when this.moveSlide() is called
