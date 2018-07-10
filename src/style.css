@@ -26,6 +26,11 @@ div.slidedeck__slide[draggable=true] {
     stroke: #dddddd;
 }
 
+.slides_delay_resize {
+    fill: #000000;
+    stroke: #000000;
+}
+
 .slides_rect {
     fill: #aaaaaa;
     stroke: #dddddd;
@@ -41,5 +46,5 @@ div.slidedeck__slide[draggable=true] {
 }
 
 .slides_delete_rect {
-    fill: #000000;
+    fill: #aaaaaa;    
 }

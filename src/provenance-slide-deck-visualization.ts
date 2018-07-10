@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 
 import './style.css';
+
 import { IProvenanceSlide, IProvenanceSlidedeck } from './api';
 import { ProvenanceSlide } from "./provenance-slide";
 
@@ -19,10 +20,11 @@ export class ProvenanceSlidedeckVisualization {
 
     private _tableHeight = 1000;
     private _tableWidth = 300;
-    private _barHeight = 50;
+    private _minimumSlideDuration = 3100;
     private _barHeightTimeMultiplier = .01;
     private _barWidth = 300;
     private _barPadding = 5;
+    private _resizebarheight = 5;
 
     private _maxSlides = 20;
 
@@ -37,6 +39,8 @@ export class ProvenanceSlidedeckVisualization {
     }
 
     private onSelect = (slide: IProvenanceSlide) => {
+        if (d3.event.defaultPrevented) return;
+
         this._slideDeck.selectedSlide = slide;
     }
 
@@ -51,11 +55,11 @@ export class ProvenanceSlidedeckVisualization {
       );
     }
 
-    private dragstarted(draggedObject: any) {
+    private moveDragStarted(draggedObject: any) {
         d3.select<any, any>(this).raise().classed("active", true);
     }
 
-    private dragged = (that: any, draggedObject: any) => {
+    private moveDragged = (that: any, draggedObject: any) => {
         d3.select<any, any>(that).attr("transform", (slide: IProvenanceSlide) => {
             const originalY = this.previousSlidesHeight(slide);
             const draggedY = d3.event.y;
@@ -66,7 +70,6 @@ export class ProvenanceSlidedeckVisualization {
                 const previousSlide = this._slideDeck.slides[myIndex-1];
                 let previousSlideCenterY = this.previousSlidesHeight(previousSlide) + (this.barTotalHeight(previousSlide) / 2);
 
-                console.log('up ' + draggedY + ' prev: ' + previousSlideCenterY);
                 if (draggedY < previousSlideCenterY) {
                     this._slideDeck.moveSlide(myIndex, myIndex -1);
                 }
@@ -76,7 +79,6 @@ export class ProvenanceSlidedeckVisualization {
                 const nextSlide = this._slideDeck.slides[myIndex + 1];
                 let nextSlideCenterY = this.previousSlidesHeight(nextSlide) + (this.barTotalHeight(nextSlide) / 2);
 
-                console.log('down ' + draggedY + ' next: ' + nextSlideCenterY);
                 if (draggedY > nextSlideCenterY) {
                     this._slideDeck.moveSlide(myIndex, myIndex + 1);
                 }
@@ -86,25 +88,43 @@ export class ProvenanceSlidedeckVisualization {
         });
     }
 
-    private dragended = (that: any, draggedObject: any) => {
+    private moveDragended = (that: any, draggedObject: any) => {
         d3.select<any, any>(that).classed("active", false)
             .attr("transform", (slide: IProvenanceSlide) => { 
                 return "translate(0," + this.previousSlidesHeight(slide) + ")"; 
             });
     }
 
+    private delayDragged = (that: any, slide: IProvenanceSlide) => {
+        slide.delay = Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
+        this.update();
+    }
+
+    private delaySubject = (that: any, slide: IProvenanceSlide) => {
+        return {y: this.barDelayHeight(slide)};
+    }
+
+    private durationDragged = (that: any, slide: IProvenanceSlide) => {
+        slide.duration = Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
+        this.update();
+    }
+
+    private durationSubject = (that: any, slide: IProvenanceSlide) => {
+        return {y: this.barDurationHeight(slide)};
+    }
+
     private barDelayHeight(slide: IProvenanceSlide) {
         let calculatedHeight = this._barHeightTimeMultiplier * slide.delay;
-        return Math.max(calculatedHeight, this._barPadding);
+        return Math.max(calculatedHeight, 0);
     }
 
     private barDurationHeight(slide: IProvenanceSlide) {
         let calculatedHeight = this._barHeightTimeMultiplier * slide.duration;
-        return Math.max(calculatedHeight, this._barHeight);
+        return Math.max(calculatedHeight, this._minimumSlideDuration * this._barHeightTimeMultiplier);
     }
 
     private barTotalHeight(slide: IProvenanceSlide) {
-        let calculatedHeight = this.barDelayHeight(slide) + this.barDurationHeight(slide);
+        let calculatedHeight = this.barDelayHeight(slide) + this.barDurationHeight(slide) + 2 * this._resizebarheight;
 
         return calculatedHeight;
     }
@@ -138,9 +158,20 @@ export class ProvenanceSlidedeckVisualization {
         const that = this;
         const newNodes = allExistingNodes.enter().append('g')
             .call((d3.drag() as any)
-                .on('start', this.dragstarted)
-                .on('drag', firstArgThis(this.dragged))
-                .on('end', firstArgThis(this.dragended)));
+                .clickDistance([2, 2])
+                .on('start', this.moveDragStarted)
+                .on('drag', firstArgThis(this.moveDragged))
+                .on('end', firstArgThis(this.moveDragended)));
+
+        newNodes.append('rect')
+            .attr('class', 'slides_delay_resize')
+            .attr('x', this._barPadding)
+            .attr('width', this._barWidth - 2 * this._barPadding)
+            .attr('height', this._resizebarheight)
+            .attr('cursor', 'ns-resize')
+            .call((d3.drag() as any)
+                .subject(firstArgThis(this.delaySubject))
+                .on('drag', firstArgThis(this.delayDragged)));
 
         newNodes.append('rect')
             .attr('class', 'slides_delay_rect')
@@ -153,20 +184,48 @@ export class ProvenanceSlidedeckVisualization {
             .attr('class', 'slides_rect')
             .attr('x', this._barPadding)
             .attr('width', this._barWidth - 2 * this._barPadding)
+            .attr('cursor', 'move')
             .on('click', this.onSelect);
+
+        newNodes.append('rect')
+            .attr('class', 'slides_duration_resize')
+            .attr('x', this._barPadding)
+            .attr('width', this._barWidth - 2 * this._barPadding)
+            .attr('height', this._resizebarheight)
+            .attr('cursor', 'ns-resize')
+            .call((d3.drag() as any)
+            .subject(firstArgThis(this.durationSubject))
+                .on('drag', firstArgThis(this.durationDragged)));
 
         newNodes.append('text')
             .attr('class', 'slides_text')
             .attr('x', 2 * this._barPadding)
-            .attr('y', this._barHeight/2)
             .attr("dy", ".35em");
 
-        newNodes.append('rect')
-            .attr('class', 'slides_delete_rect')
-            .attr('x', this._barWidth - this._barHeight + 2 * this._barPadding)
-            .attr('height', this._barHeight - 4 * this._barPadding)
-            .attr('width', this._barHeight - 4 * this._barPadding)
-            .attr('id', (data: IProvenanceSlide) => { return 'delete_' + data.id; })
+        newNodes.append('text')
+            .attr('class', 'slides_delaytext')
+            .attr('x', this._barWidth /2 + 2 * this._barPadding)
+            .attr("dy", ".35em");
+
+        newNodes.append('text')
+            .attr('class', 'slides_durationtext')
+            .attr('x', this._barWidth /2 + 2 * this._barPadding)
+            .attr("dy", ".35em");
+
+        // newNodes.append('rect')
+        //     .attr('class', 'slides_delete_rect')
+        //     .attr('x', this._barWidth - 50 + 2 * this._barPadding)
+        //     .attr('width', 50 - 4 * this._barPadding)
+        //     .attr('height', 50 - 4 * this._barPadding)
+        //     .attr('id', (data: IProvenanceSlide) => { return 'delete_' + data.id; })
+        //     .on('click', this.onDelete);
+
+        newNodes.append('image')
+            .attr('class', 'slides_delete_icon')
+            .attr("xlink:href", "https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg")
+            .attr('x', this._barWidth - 50 + 2 * this._barPadding)
+            .attr("width", 32)
+            .attr("height", 32)
             .on('click', this.onDelete);
 
         // Update all nodes
@@ -178,16 +237,34 @@ export class ProvenanceSlidedeckVisualization {
         allNodes.select('rect.slides_delay_rect')
             .attr('height', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide); });
 
+        allNodes.select('rect.slides_delay_resize')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide); });
+
         allNodes.select('rect.slides_rect')
             .attr('selected', (slide:IProvenanceSlide)  => { return this._slideDeck.selectedSlide === slide; })
-            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide); })
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight; })
             .attr('height', (slide: IProvenanceSlide) => { return this.barDurationHeight(slide); });
+
+        allNodes.select('rect.slides_duration_resize')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barTotalHeight(slide) - this._resizebarheight; });
             
-        allNodes.select('rect.slides_delete_rect')
-            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide); } );
+        // allNodes.select('rect.slides_delete_rect')
+        //     .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight; });
+            
+        allNodes.select('image.slides_delete_icon')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight; });
 
         allNodes.select('text.slides_text')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight + 2*this._barPadding; })
             .text((slide: IProvenanceSlide) => { return slide.name; });
+
+        allNodes.select('text.slides_delaytext')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight + 1*this._barPadding; })
+            .text((slide: IProvenanceSlide) => { return 'transition: ' + slide.delay /1000; });
+
+        allNodes.select('text.slides_durationtext')
+            .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight + 4*this._barPadding; })
+            .text((slide: IProvenanceSlide) => { return 'duration: ' + slide.duration /1000; });
 
         allExistingNodes.exit().remove();
     }
