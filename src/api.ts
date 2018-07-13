@@ -1,4 +1,4 @@
-import ProvenanceAPI, { IProvenanceGraph } from "@visualstorytelling/provenance-core";
+import * as ProvenanceAPI from "@visualstorytelling/provenance-core";
 
 export type Annotation = any;
 
@@ -21,7 +21,7 @@ export interface IProvenanceSlidedeck {
     readonly application: ProvenanceAPI.Application;
     slides: IProvenanceSlide[];
     selectedSlide: IProvenanceSlide | null;
-    graph: IProvenanceGraph;
+    graph: ProvenanceAPI.IProvenanceGraph;
 
     addSlide(slide?: IProvenanceSlide, index?: number): IProvenanceSlide;
     removeSlide(slide: IProvenanceSlide): void;
