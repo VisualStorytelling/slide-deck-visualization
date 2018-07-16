@@ -2,8 +2,7 @@ import * as d3 from 'd3';
 
 import './style.css';
 
-import { IProvenanceSlide, IProvenanceSlidedeck } from './api';
-import { ProvenanceSlide } from "./provenance-slide";
+import { IProvenanceSlide, ProvenanceSlide, IProvenanceSlidedeck } from '@visualstorytelling/provenance-core';
 
 function firstArgThis(f: (...args: any[]) => any) {
     return function (this: any, ...args: any[]) {

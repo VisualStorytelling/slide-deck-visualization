@@ -1,8 +1,5 @@
-import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry } from "@visualstorytelling/provenance-core";
-import { ProvenanceSlidedeck } from "../src/provenance-slide-deck";
-import { ProvenanceSlide } from "../src/provenance-slide";
+import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry, ProvenanceSlidedeck, ProvenanceSlide } from "@visualstorytelling/provenance-core";
 import { ProvenanceSlidedeckVisualization } from '../src/provenance-slide-deck-visualization';
-import * as d3 from 'd3';
 
 let graph: ProvenanceGraph;
 let tracker: ProvenanceTracker;
