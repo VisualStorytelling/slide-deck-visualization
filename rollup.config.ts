@@ -8,7 +8,7 @@ import css from 'rollup-plugin-css-only';
 
 const pkg = require('./package.json');
 
-const libraryName = 'provenance-slide-deck';
+const libraryName = 'slide-deck-visualization';
 
 export default {
   input: `src/${libraryName}.ts`,

@@ -1,5 +1,5 @@
 import { ProvenanceGraph, ProvenanceGraphTraverser, ProvenanceTracker, ActionFunctionRegistry, ProvenanceSlidedeck, ProvenanceSlide } from "@visualstorytelling/provenance-core";
-import { ProvenanceSlidedeckVisualization } from '../src/provenance-slide-deck-visualization';
+import { SlideDeckVisualization } from '../src/slide-deck-visualization';
 
 let graph: ProvenanceGraph;
 let tracker: ProvenanceTracker;
@@ -60,7 +60,7 @@ describe('ProvenanceTreeSlidedeck', () => {
   });
 
   it('should render without crashing', () => {
-    const vis = new ProvenanceSlidedeckVisualization(slideDeck, visRoot);
+    const vis = new SlideDeckVisualization(slideDeck, visRoot);
   });
 
   // it('should render all slides', () => {
@@ -69,9 +69,9 @@ describe('ProvenanceTreeSlidedeck', () => {
   // });
 
   describe.skip('event listeners', () => {
-    let vis: ProvenanceSlidedeckVisualization;
+    let vis: SlideDeckVisualization;
     beforeEach(() => {
-      vis = new ProvenanceSlidedeckVisualization(slideDeck, visRoot);
+      vis = new SlideDeckVisualization(slideDeck, visRoot);
     });
 
     it('should have a working onDelete listener', () => {

@@ -12,7 +12,7 @@ function firstArgThis(f: (...args: any[]) => any) {
 
 type IndexedSlide = { slide: IProvenanceSlide, startTime: number };
 
-export class ProvenanceSlidedeckVisualization {
+export class SlideDeckVisualization {
     private _slideDeck: IProvenanceSlidedeck;
     private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
     private _slideTable: d3.Selection<SVGElement, any, null, undefined>;
