@@ -18,6 +18,7 @@ type IndexedSlide = { slide: IProvenanceSlide; startTime: number };
 
 export class SlideDeckVisualization {
     private _slideDeck: IProvenanceSlidedeck;
+    private _hoveredSlide: IProvenanceSlide | null = null;
     private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
     private _slideTable: d3.Selection<SVGElement, any, null, undefined>;
     private _tableHeight = 1000;
@@ -27,7 +28,11 @@ export class SlideDeckVisualization {
     private _barWidth = 270;
     private _barPadding = 5;
     private _resizebarheight = 5;
-
+    private _previousSlideY = 0;
+    private _lineX1 = 30;
+    private _placeholderWidth = this._tableWidth - 40;
+    private _placeholderY = 0;
+    private _placeholderHeight = 40;
     private _maxSlides = 20;
 
     private _timeIndexedSlides: IndexedSlide[] = [];
@@ -46,7 +51,11 @@ export class SlideDeckVisualization {
         this._slideDeck.selectedSlide = slide;
     };
     private onMouseOver = (slide: IProvenanceSlide) => {
-        this._slideDeck.hoveredSlide = slide;
+        this._hoveredSlide = slide;
+        this.update();
+    };
+    private onMouseOut = () => {
+        this._hoveredSlide = null;
         this.update();
     };
 
@@ -266,19 +275,6 @@ export class SlideDeckVisualization {
             .attr("x", 2 * this._barPadding)
             .attr("dy", ".35em");
 
-        // newNodes.append('text')
-        //     .attr('class', 'slides_durationtext')
-        //     .attr('x', this._barWidth /2 + 2 * this._barPadding)
-        //     .attr("dy", ".35em");
-
-        // newNodes.append('rect')
-        //     .attr('class', 'slides_delete_rect')
-        //     .attr('x', this._barWidth - 50 + 2 * this._barPadding)
-        //     .attr('width', 50 - 4 * this._barPadding)
-        //     .attr('height', 50 - 4 * this._barPadding)
-        //     .attr('id', (data: IProvenanceSlide) => { return 'delete_' + data.id; })
-        //     .on('click', this.onDelete);
-
         newNodes
             .append("image")
             .attr("class", "slides_delete_icon")
@@ -290,11 +286,14 @@ export class SlideDeckVisualization {
             .attr("width", 20)
             .attr("height", 20)
             .on("click", this.onDelete);
+        const placeholder = this._slideTable.select("rect.slides_placeholder");
 
         // Update all nodes
+
         const allNodes = newNodes
             .merge(allExistingNodes)
             .attr("transform", (slide: IProvenanceSlide) => {
+                this._previousSlideY = this.previousSlidesHeight(slide);
                 return "translate(30," + this.previousSlidesHeight(slide) + ")";
             });
 
@@ -319,6 +318,8 @@ export class SlideDeckVisualization {
                 return this.barDelayHeight(slide) + this._resizebarheight;
             })
             .attr("height", (slide: IProvenanceSlide) => {
+                this._placeholderY =
+                    this._previousSlideY + this.barDurationHeight(slide);
                 return this.barDurationHeight(slide);
             });
         allNodes.select("circle.time").attr("cy", (slide: IProvenanceSlide) => {
@@ -339,9 +340,7 @@ export class SlideDeckVisualization {
                 return this.barDelayHeight(slide) + this._resizebarheight;
             })
             .style("display", (slide: IProvenanceSlide) => {
-                return this._slideDeck.hoveredSlide === slide
-                    ? "block"
-                    : "none";
+                return this._hoveredSlide === slide ? "block" : "none";
             });
         allNodes
             .select("text.slides_text")
@@ -383,7 +382,11 @@ export class SlideDeckVisualization {
             .text((slide: IProvenanceSlide) => {
                 return slide.duration / 1000;
             });
-
+        placeholder.attr("y", this._placeholderY + 20);
+        this._slideTable.select("line").attr("y2", this._placeholderY + 20);
+        this._slideTable
+            .select("foreignObject")
+            .attr("y", this._placeholderY + 30);
         allExistingNodes.exit().remove();
     }
 
@@ -404,29 +407,36 @@ export class SlideDeckVisualization {
             .attr("width", this._tableWidth);
         this._slideTable
             .append("line")
-            .attr("x1", 30)
+            .attr("x1", this._lineX1)
             .attr("y1", 0)
-            .attr("x2", 30)
-            .attr("y2", this._tableHeight)
+            .attr("x2", this._lineX1)
             .attr("stroke", "gray")
             .attr("stroke-width", 2);
-        // const _slidesPlaceholder = this._slideTable
-        //     .append("rect")
-        //     .attr("class", "slides_placeholder")
-        //     .attr("x", 33)
-        //     .attr("y", 0)
-        //     .attr("width", this._tableWidth - 40)
-        //     .attr("height", 40);
+        this._slideTable
+            .append("rect")
+            .attr("class", "slides_placeholder")
+            .attr("x", this._lineX1 + this._barPadding)
+            .attr("y", 0)
+            .attr("width", this._placeholderWidth)
+            .attr("height", this._placeholderHeight);
+        this._slideTable
+            .append("svg:foreignObject")
+            .attr("x", (this._tableWidth - 40) / 2)
+            .attr("cursor", "pointer")
+            .attr("width", 30)
+            .attr("height", 30)
+            .append("xhtml:body")
+            .html('<i class="fa fa-file-text-o"></i>');
 
         slideDeck.on("slideAdded", () => this.update());
         slideDeck.on("slideRemoved", () => this.update());
         slideDeck.on("slidesMoved", () => this.update());
         slideDeck.on("slideSelected", () => this.update());
 
-        const addSlideButton = this._root
-            .append<HTMLButtonElement>("button")
-            .text("add slide");
-        addSlideButton.on("click", this.onAdd);
+        // const addSlideButton = this._root
+        //     .append<HTMLButtonElement>("button")
+        //     .text("add slide");
+        // addSlideButton.on("click", this.onAdd);
 
         this.update();
     }

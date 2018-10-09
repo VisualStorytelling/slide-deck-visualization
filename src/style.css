@@ -1,3 +1,11 @@
+@import "~font-awesome/css/font-awesome.css";
+#slideDeck {
+    height: 400px;
+    overflow-y: scroll;
+}
+::-webkit-scrollbar {
+    display: none;
+}
 div.slidedeck__slide {
     background-color: #ccc;
     margin-bottom: 0.5em;
@@ -10,6 +18,9 @@ table.slides__table {
 
 table.slides__table tr.selected {
     background-color: #00b8d9;
+}
+.add {
+    font-family: "FontAwesome";
 }
 
 div.slidedeck__slide[draggable="true"] {
