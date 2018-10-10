@@ -18,7 +18,6 @@ type IndexedSlide = { slide: IProvenanceSlide; startTime: number };
 
 export class SlideDeckVisualization {
     private _slideDeck: IProvenanceSlidedeck;
-    private _hoveredSlide: IProvenanceSlide | null = null;
     private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
     private _slideTable: d3.Selection<SVGElement, any, null, undefined>;
     private _tableHeight = 1000;
@@ -50,14 +49,18 @@ export class SlideDeckVisualization {
 
         this._slideDeck.selectedSlide = slide;
     };
-    private onMouseOver = (slide: IProvenanceSlide) => {
-        this._hoveredSlide = slide;
-        this.update();
-    };
-    private onMouseOut = () => {
-        this._hoveredSlide = null;
-        this.update();
-    };
+    private onMouseOver() {
+        let delete_icon = d3.event.target.parentElement.querySelector(
+            ".slides_delete_icon"
+        );
+        delete_icon.style.display = "block";
+    }
+    private onMouseOut() {
+        let delete_icon = d3.event.target.parentElement.querySelector(
+            ".slides_delete_icon"
+        );
+        delete_icon.style.display = "none";
+    }
 
     private onAdd = () => {
         let slideDeck = this._slideDeck;
@@ -191,7 +194,7 @@ export class SlideDeckVisualization {
         this.updateTimeIndices(this._slideDeck);
 
         const allExistingNodes = this._slideTable
-            .selectAll("g")
+            .selectAll("g.slide")
             .data<any>(this._slideDeck.slides, (d: IProvenanceSlide) => {
                 return d.id;
             });
@@ -201,6 +204,7 @@ export class SlideDeckVisualization {
         const newNodes = allExistingNodes
             .enter()
             .append("g")
+            .attr("class", "slide")
             .call(
                 (d3.drag() as any)
                     .clickDistance([2, 2])
@@ -230,20 +234,50 @@ export class SlideDeckVisualization {
             .attr("width", this._barWidth - 2 * this._barPadding)
             .on("click", this.onSelect);
 
-        newNodes
+        let slide_group = newNodes
+            .append("g")
+            .attr("transform", "translate(5,0)")
+            .attr("class", "slide_group")
+            .on("mouseover", this.onMouseOver)
+            .on("mouseout", this.onMouseOut);
+        slide_group
             .append("rect")
             .attr("class", "slides_rect")
-            .attr("x", this._barPadding)
             .attr("width", this._barWidth - 2 * this._barPadding)
             .attr("cursor", "move")
-            .on("click", this.onSelect)
-            .on("mouseover", this.onMouseOver);
+            .on("click", this.onSelect);
+
+        slide_group
+            .append("text")
+            .attr("class", "slides_text")
+            .attr("x", 2 * this._barPadding)
+            .attr("dy", ".35em");
+
+        slide_group
+            .append("text")
+            .attr("class", "slides_delaytext")
+            .attr("x", 2 * this._barPadding)
+            .attr("dy", ".35em");
+
+        slide_group
+            .append("image")
+            .attr("class", "slides_delete_icon")
+            .attr(
+                "xlink:href",
+                "https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg"
+            )
+            .attr("x", this._barWidth - 50 + 2 * this._barPadding)
+            .attr("width", 20)
+            .attr("height", 20)
+            .on("click", this.onDelete);
+        const placeholder = this._slideTable.select("rect.slides_placeholder");
 
         newNodes
             .append("text")
             .attr("class", "slides_durationtext")
             .attr("x", this._barPadding - 30)
             .attr("dy", "-.65em");
+
         newNodes
             .append("circle")
             .attr("class", "time")
@@ -262,31 +296,6 @@ export class SlideDeckVisualization {
                     .subject(firstArgThis(this.durationSubject))
                     .on("drag", firstArgThis(this.durationDragged))
             );
-
-        newNodes
-            .append("text")
-            .attr("class", "slides_text")
-            .attr("x", 2 * this._barPadding)
-            .attr("dy", ".35em");
-
-        newNodes
-            .append("text")
-            .attr("class", "slides_delaytext")
-            .attr("x", 2 * this._barPadding)
-            .attr("dy", ".35em");
-
-        newNodes
-            .append("image")
-            .attr("class", "slides_delete_icon")
-            .attr(
-                "xlink:href",
-                "https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg"
-            )
-            .attr("x", this._barWidth - 50 + 2 * this._barPadding)
-            .attr("width", 20)
-            .attr("height", 20)
-            .on("click", this.onDelete);
-        const placeholder = this._slideTable.select("rect.slides_placeholder");
 
         // Update all nodes
 
@@ -308,8 +317,8 @@ export class SlideDeckVisualization {
             .attr("y", (slide: IProvenanceSlide) => {
                 return this.barDelayHeight(slide);
             });
-
-        allNodes
+        slide_group = allNodes.select("g.slide_group");
+        slide_group
             .select("rect.slides_rect")
             .attr("selected", (slide: IProvenanceSlide) => {
                 return this._slideDeck.selectedSlide === slide;
@@ -322,27 +331,13 @@ export class SlideDeckVisualization {
                     this._previousSlideY + this.barDurationHeight(slide);
                 return this.barDurationHeight(slide);
             });
-        allNodes.select("circle.time").attr("cy", (slide: IProvenanceSlide) => {
-            return this.barDelayHeight(slide) + this._resizebarheight;
-        });
-        allNodes
-            .select("rect.slides_duration_resize")
-            .attr("y", (slide: IProvenanceSlide) => {
-                return this.barTotalHeight(slide) - this._resizebarheight;
-            });
-
-        // allNodes.select('rect.slides_delete_rect')
-        //     .attr('y', (slide: IProvenanceSlide) => { return this.barDelayHeight(slide) + this._resizebarheight; });
-
-        allNodes
+        slide_group
             .select("image.slides_delete_icon")
             .attr("y", (slide: IProvenanceSlide) => {
                 return this.barDelayHeight(slide) + this._resizebarheight;
-            })
-            .style("display", (slide: IProvenanceSlide) => {
-                return this._hoveredSlide === slide ? "block" : "none";
             });
-        allNodes
+
+        slide_group
             .select("text.slides_text")
             .attr("y", (slide: IProvenanceSlide) => {
                 return (
@@ -355,7 +350,7 @@ export class SlideDeckVisualization {
                 return slide.name;
             });
 
-        allNodes
+        slide_group
             .select("text.slides_delaytext")
             .attr("y", (slide: IProvenanceSlide) => {
                 return (
@@ -369,6 +364,14 @@ export class SlideDeckVisualization {
                 return "transition: " + slide.delay / 1000;
             });
 
+        allNodes.select("circle.time").attr("cy", (slide: IProvenanceSlide) => {
+            return this.barDelayHeight(slide) + this._resizebarheight;
+        });
+        allNodes
+            .select("rect.slides_duration_resize")
+            .attr("y", (slide: IProvenanceSlide) => {
+                return this.barTotalHeight(slide) - this._resizebarheight;
+            });
         allNodes
             .select("text.slides_durationtext")
             .attr("y", (slide: IProvenanceSlide) => {
@@ -382,6 +385,7 @@ export class SlideDeckVisualization {
             .text((slide: IProvenanceSlide) => {
                 return slide.duration / 1000;
             });
+
         placeholder.attr("y", this._placeholderY + 20);
         this._slideTable.select("line").attr("y2", this._placeholderY + 20);
         this._slideTable
@@ -432,11 +436,6 @@ export class SlideDeckVisualization {
         slideDeck.on("slideRemoved", () => this.update());
         slideDeck.on("slidesMoved", () => this.update());
         slideDeck.on("slideSelected", () => this.update());
-
-        // const addSlideButton = this._root
-        //     .append<HTMLButtonElement>("button")
-        //     .text("add slide");
-        // addSlideButton.on("click", this.onAdd);
 
         this.update();
     }
