@@ -38,28 +38,29 @@ export class SlideDeckVisualization {
 
     private _index = (slide: IProvenanceSlide): number => {
         return this._slideDeck.slides.indexOf(slide);
-    };
+    }
 
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
-    };
+    }
 
     private onSelect = (slide: IProvenanceSlide) => {
         if (d3.event.defaultPrevented) return;
 
         this._slideDeck.selectedSlide = slide;
-    };
+    }
+
     private onMouseOver() {
-        let delete_icon = d3.event.target.parentElement.querySelector(
+        let deleteIcon = d3.event.target.parentElement.querySelector(
             ".slides_delete_icon"
         );
-        delete_icon.style.display = "block";
+        deleteIcon.style.display = "block";
     }
     private onMouseOut() {
-        let delete_icon = d3.event.target.parentElement.querySelector(
+        let deleteIcon = d3.event.target.parentElement.querySelector(
             ".slides_delete_icon"
         );
-        delete_icon.style.display = "none";
+        deleteIcon.style.display = "none";
     }
 
     private onAdd = () => {
@@ -72,7 +73,7 @@ export class SlideDeckVisualization {
                 ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
                 : slideDeck.slides.length
         );
-    };
+    }
 
     private moveDragStarted(draggedObject: any) {
         d3.select<any, any>(this)
@@ -116,7 +117,7 @@ export class SlideDeckVisualization {
                 return "translate(30," + d3.event.y + ")";
             }
         );
-    };
+    }
 
     private moveDragended = (that: any, draggedObject: any) => {
         d3.select<any, any>(that)
@@ -124,26 +125,26 @@ export class SlideDeckVisualization {
             .attr("transform", (slide: IProvenanceSlide) => {
                 return "translate(30," + this.previousSlidesHeight(slide) + ")";
             });
-    };
+    }
 
     private delayDragged = (that: any, slide: IProvenanceSlide) => {
         slide.delay = Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
         this.update();
-    };
+    }
 
     private delaySubject = (that: any, slide: IProvenanceSlide) => {
         return { y: this.barDelayHeight(slide) };
-    };
+    }
 
     private durationDragged = (that: any, slide: IProvenanceSlide) => {
         slide.duration =
             Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
         this.update();
-    };
+    }
 
     private durationSubject = (that: any, slide: IProvenanceSlide) => {
         return { y: this.barDurationHeight(slide) };
-    };
+    }
 
     private barDelayHeight(slide: IProvenanceSlide) {
         let calculatedHeight = this._barHeightTimeMultiplier * slide.delay;
@@ -234,32 +235,32 @@ export class SlideDeckVisualization {
             .attr("width", this._barWidth - 2 * this._barPadding)
             .on("click", this.onSelect);
 
-        let slide_group = newNodes
+        let slideGroup = newNodes
             .append("g")
             .attr("transform", "translate(5,0)")
             .attr("class", "slide_group")
             .on("mouseover", this.onMouseOver)
             .on("mouseout", this.onMouseOut);
-        slide_group
+        slideGroup
             .append("rect")
             .attr("class", "slides_rect")
             .attr("width", this._barWidth - 2 * this._barPadding)
             .attr("cursor", "move")
             .on("click", this.onSelect);
 
-        slide_group
+        slideGroup
             .append("text")
             .attr("class", "slides_text")
             .attr("x", 2 * this._barPadding)
             .attr("dy", ".35em");
 
-        slide_group
+        slideGroup
             .append("text")
             .attr("class", "slides_delaytext")
             .attr("x", 2 * this._barPadding)
             .attr("dy", ".35em");
 
-        slide_group
+        slideGroup
             .append("image")
             .attr("class", "slides_delete_icon")
             .attr(
@@ -317,8 +318,8 @@ export class SlideDeckVisualization {
             .attr("y", (slide: IProvenanceSlide) => {
                 return this.barDelayHeight(slide);
             });
-        slide_group = allNodes.select("g.slide_group");
-        slide_group
+        slideGroup = allNodes.select("g.slide_group");
+        slideGroup
             .select("rect.slides_rect")
             .attr("selected", (slide: IProvenanceSlide) => {
                 return this._slideDeck.selectedSlide === slide;
@@ -331,13 +332,13 @@ export class SlideDeckVisualization {
                     this._previousSlideY + this.barDurationHeight(slide);
                 return this.barDurationHeight(slide);
             });
-        slide_group
+        slideGroup
             .select("image.slides_delete_icon")
             .attr("y", (slide: IProvenanceSlide) => {
                 return this.barDelayHeight(slide) + this._resizebarheight;
             });
 
-        slide_group
+        slideGroup
             .select("text.slides_text")
             .attr("y", (slide: IProvenanceSlide) => {
                 return (
@@ -350,7 +351,7 @@ export class SlideDeckVisualization {
                 return slide.name;
             });
 
-        slide_group
+        slideGroup
             .select("text.slides_delaytext")
             .attr("y", (slide: IProvenanceSlide) => {
                 return (
@@ -430,6 +431,7 @@ export class SlideDeckVisualization {
             .attr("width", 30)
             .attr("height", 30)
             .append("xhtml:body")
+            .on('click', this.onAdd)
             .html('<i class="fa fa-file-text-o"></i>');
 
         slideDeck.on("slideAdded", () => this.update());

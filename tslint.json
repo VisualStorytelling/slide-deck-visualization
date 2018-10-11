@@ -10,7 +10,8 @@
   },
   "rules": {
     "semicolon": [true, "always"],
-    "indent": [true, "spaces", 4]
+    "indent": [true, "spaces", 4],
+    "class-name": true
   },
 
   "rulesDirectory": []
