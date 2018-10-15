@@ -7,6 +7,7 @@ import {
     ProvenanceSlide,
     IProvenanceSlidedeck
 } from "@visualstorytelling/provenance-core";
+import { all } from "q";
 
 function firstArgThis(f: (...args: any[]) => any) {
     return function(this: any, ...args: any[]) {
@@ -33,6 +34,9 @@ export class SlideDeckVisualization {
     private _placeholderY = 0;
     private _placeholderHeight = 40;
     private _maxSlides = 20;
+    private _toolbarX = 200;
+    private _toolbarY = 10;
+    private _toolbarPadding = 20;
 
     private _timeIndexedSlides: IndexedSlide[] = [];
 
@@ -50,25 +54,41 @@ export class SlideDeckVisualization {
         this._slideDeck.selectedSlide = slide;
     }
 
-    private onMouseOver() {
-        let deleteIcon = d3.event.target.parentElement.querySelector(
-            ".slides_delete_icon"
+    private onMouseEnter() {
+        let toolbar = d3.event.target.parentElement.querySelector(
+            ".slide_toolbar"
         );
-        deleteIcon.style.display = "block";
+        toolbar.style.display = "block";
     }
-    private onMouseOut() {
-        let deleteIcon = d3.event.target.parentElement.querySelector(
-            ".slides_delete_icon"
+    private onMouseLeave() {
+        let toolbar = d3.event.target.parentElement.querySelector(
+            ".slide_toolbar"
         );
-        deleteIcon.style.display = "none";
+        toolbar.style.display = "none";
     }
 
     private onAdd = () => {
         let slideDeck = this._slideDeck;
         const node = slideDeck.graph.current;
-        const slide = new ProvenanceSlide(node.label, 5000, 0, [], node);
+        const slide = new ProvenanceSlide(node.label, 1000, 0, [], node);
         slideDeck.addSlide(
             slide,
+            slideDeck.selectedSlide
+                ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
+                : slideDeck.slides.length
+        );
+    }
+    private onClone = (slide: IProvenanceSlide) => {
+        let slideDeck = this._slideDeck;
+        const cloneSlide = new ProvenanceSlide(
+            slide.name,
+            1000,
+            0,
+            [],
+            slide.node
+        );
+        slideDeck.addSlide(
+            cloneSlide,
             slideDeck.selectedSlide
                 ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
                 : slideDeck.slides.length
@@ -239,8 +259,9 @@ export class SlideDeckVisualization {
             .append("g")
             .attr("transform", "translate(5,0)")
             .attr("class", "slide_group")
-            .on("mouseover", this.onMouseOver)
-            .on("mouseout", this.onMouseOut);
+            .on("mouseenter", this.onMouseEnter)
+            .on("mouseleave", this.onMouseLeave);
+
         slideGroup
             .append("rect")
             .attr("class", "slides_rect")
@@ -259,18 +280,28 @@ export class SlideDeckVisualization {
             .attr("class", "slides_delaytext")
             .attr("x", 2 * this._barPadding)
             .attr("dy", ".35em");
-
-        slideGroup
-            .append("image")
+        let toolbar = slideGroup.append("g").attr("class", "slide_toolbar");
+        toolbar
+            .append("svg:foreignObject")
             .attr("class", "slides_delete_icon")
-            .attr(
-                "xlink:href",
-                "https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg"
-            )
-            .attr("x", this._barWidth - 50 + 2 * this._barPadding)
+            .attr("x", this._toolbarX)
+            .attr("cursor", "pointer")
             .attr("width", 20)
             .attr("height", 20)
-            .on("click", this.onDelete);
+            .append("xhtml:body")
+            .on("click", this.onDelete)
+            .html('<i class="fa fa-trash-o"></i>');
+
+        toolbar
+            .append("svg:foreignObject")
+            .attr("class", "slides_clone_icon")
+            .attr("x", this._toolbarX + this._toolbarPadding)
+            .attr("cursor", "pointer")
+            .attr("width", 20)
+            .attr("height", 20)
+            .append("xhtml:body")
+            .on("click", this.onClone)
+            .html('<i class="fa fa-copy"></i>');
         const placeholder = this._slideTable.select("rect.slides_placeholder");
 
         newNodes
@@ -332,12 +363,17 @@ export class SlideDeckVisualization {
                     this._previousSlideY + this.barDurationHeight(slide);
                 return this.barDurationHeight(slide);
             });
-        slideGroup
-            .select("image.slides_delete_icon")
+        toolbar = allNodes.select("g.slide_toolbar");
+        toolbar
+            .select("foreignObject.slides_delete_icon")
             .attr("y", (slide: IProvenanceSlide) => {
-                return this.barDelayHeight(slide) + this._resizebarheight;
+                return this._toolbarY;
             });
-
+        toolbar
+            .select("foreignObject.slides_clone_icon")
+            .attr("y", (slide: IProvenanceSlide) => {
+                return this._toolbarY;
+            });
         slideGroup
             .select("text.slides_text")
             .attr("y", (slide: IProvenanceSlide) => {
@@ -390,7 +426,7 @@ export class SlideDeckVisualization {
         placeholder.attr("y", this._placeholderY + 20);
         this._slideTable.select("line").attr("y2", this._placeholderY + 20);
         this._slideTable
-            .select("foreignObject")
+            .select("foreignObject.slide_add")
             .attr("y", this._placeholderY + 30);
         allExistingNodes.exit().remove();
     }
@@ -426,12 +462,13 @@ export class SlideDeckVisualization {
             .attr("height", this._placeholderHeight);
         this._slideTable
             .append("svg:foreignObject")
+            .attr("class", "slide_add")
             .attr("x", (this._tableWidth - 40) / 2)
             .attr("cursor", "pointer")
             .attr("width", 30)
             .attr("height", 30)
             .append("xhtml:body")
-            .on('click', this.onAdd)
+            .on("click", this.onAdd)
             .html('<i class="fa fa-file-text-o"></i>');
 
         slideDeck.on("slideAdded", () => this.update());

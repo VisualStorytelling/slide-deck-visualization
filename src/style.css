@@ -75,7 +75,3 @@ div.slidedeck__slide[draggable="true"] {
     font-size: 12px;
     font-weight: 600;
 }
-.slides_delete_icon {
-    display: none;
-    cursor: pointer;
-}
