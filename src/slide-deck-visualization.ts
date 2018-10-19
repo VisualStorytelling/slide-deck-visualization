@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import './style.css';
 
 import { IProvenanceSlide, ProvenanceSlide, IProvenanceSlidedeck } from '@visualstorytelling/provenance-core';
+import { addButton } from './annotations/annotations';
 
 function firstArgThis(f: (...args: any[]) => any) {
     return function (this: any, ...args: any[]) {
@@ -270,6 +271,7 @@ export class SlideDeckVisualization {
 
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
         this._slideDeck = slideDeck;
+        addButton(slideDeck);
         this._root = d3.select(elm);
         this._slideTable = this._root.append<SVGElement>('svg')
             .attr('class', 'slide__table')

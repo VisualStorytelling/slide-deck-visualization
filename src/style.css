@@ -48,3 +48,15 @@ div.slidedeck__slide[draggable=true] {
 .slides_delete_rect {
     fill: #aaaaaa;    
 }
+
+#add-annotation {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+    z-index: 10;
+}
+
+.annotation {
+    background-color: red;
+    position: absolute;
+}
