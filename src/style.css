@@ -71,6 +71,9 @@ div.slidedeck__slide[draggable="true"] {
     stroke: black;
     stroke-width: 1px;
 }
+#player_placeholder {
+    stroke-dasharray: none;
+}
 .slides_durationtext {
     font-size: 12px;
     font-weight: 600;
