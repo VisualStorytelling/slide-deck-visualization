@@ -42,7 +42,7 @@ export class SlideDeckVisualization {
     private _toolbarPadding = 20;
     private _slideDuration = 1000;
     private _timeIndexedSlides: IndexedSlide[] = [];
-    private _player: ProvenanceSlidedeckPlayer<IProvenanceSlide> | null = null;
+    private _player: ProvenanceSlidedeckPlayer<IProvenanceSlide>;
     private _nextSlideY = 50;
     private _index = (slide: IProvenanceSlide): number => {
         return this._slideDeck.slides.indexOf(slide);
@@ -221,12 +221,10 @@ export class SlideDeckVisualization {
         this._slideDeck.previous();
     }
     private onPlay = () => {
-        if (this._player != null) {
-            if (this._player.status === STATUS.IDLE) {
-                this._player.play();
-            } else {
-                this._player.stop();
-            }
+        if (this._player.status === STATUS.IDLE) {
+            this._player.play();
+        } else {
+            this._player.stop();
         }
 
         d3.select(d3.event.target).classed(
@@ -478,16 +476,20 @@ export class SlideDeckVisualization {
         allExistingNodes.exit().remove();
     }
     private animate() {
-        if (this._player != null) {
-            if (this._player.status === STATUS.PLAYING) {
-                this._slideTable
-                    .select(".currentTime")
-                    .transition()
-                    .ease(d3.easeLinear)
-                    .duration(this._slideDuration)
-                    .attr("cy", this._nextSlideY)
-                    .on("end", () => this.isLastSlide());
-            }
+        if (this._player.status === STATUS.PLAYING) {
+            this._slideTable
+                .select(".currentTime")
+                .transition()
+                .ease(d3.easeLinear)
+                .duration(this._slideDuration)
+                .attr("cy", this._nextSlideY)
+                .on("end", () => this.isLastSlide());
+        } else {
+            this._slideTable
+                .select(".currentTime")
+                .transition()
+                .ease(d3.easeLinear)
+                .duration(0);
         }
     }
     isLastSlide() {
@@ -499,20 +501,18 @@ export class SlideDeckVisualization {
                 this._slideDeck.slides.length - 1
             ) {
                 setTimeout(() => {
-                    if (this._player != null) {
-                        this._nextSlideY = 50;
-                        this._slideTable
-                            .select(".currentTime")
-                            .attr("cy", this._nextSlideY);
-                        this._slideDeck.selectedSlide = this._slideDeck.slides[0];
-                        this._slideTable
-                            .select(".fa-pause")
-                            .classed("fa-play", true)
-                            .classed("fa-pause", false);
-                        this._player.stop();
-                        this._player.currentSlideIndex = 0;
-                    }
-                }, 1000);
+                    this._nextSlideY = 50;
+                    this._slideTable
+                        .select(".currentTime")
+                        .attr("cy", this._nextSlideY);
+                    this._slideDeck.selectedSlide = this._slideDeck.slides[0];
+                    this._slideTable
+                        .select(".fa-pause")
+                        .classed("fa-play", true)
+                        .classed("fa-pause", false);
+                    this._player.stop();
+                    this._player.currentSlideIndex = 0;
+                }, 2000);
             }
         }
     }
@@ -555,11 +555,6 @@ export class SlideDeckVisualization {
         slideDeck.on("slideRemoved", () => this.update());
         slideDeck.on("slidesMoved", () => this.update());
         slideDeck.on("slideSelected", () => this.update());
-        this.setPlayer();
-
-        this.update();
-    }
-    private setPlayer() {
         this._player = new ProvenanceSlidedeckPlayer(
             this._slideDeck.slides,
             nextSlide => {
@@ -568,7 +563,10 @@ export class SlideDeckVisualization {
                 this._slideDeck.selectedSlide = nextSlide;
             }
         );
+
+        this.update();
     }
+
     private setPlaceholder(id: string) {
         this._slideTable
             .append("rect")
