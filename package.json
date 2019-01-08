@@ -39,7 +39,7 @@
         ]
     },
     "devDependencies": {
-        "@types/d3": "^5.0.0",
+        "@types/d3": "^5.0.1",
         "@types/d3-drag": "^1.2.1",
         "@types/d3-hierarchy": "^1.1.2",
         "@types/d3-scale": "^2.0.1",
