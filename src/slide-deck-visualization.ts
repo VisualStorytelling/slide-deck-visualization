@@ -38,12 +38,13 @@ export class SlideDeckVisualization {
     private _placeholderHeight = 30;
     private _maxSlides = 20;
     private _toolbarX = 200;
-    private _toolbarY = 10;
     private _toolbarPadding = 20;
     private _slideDuration = 1000;
     private _timeIndexedSlides: IndexedSlide[] = [];
     private _player: ProvenanceSlidedeckPlayer<IProvenanceSlide>;
     private _nextSlideY = 50;
+    private _svgTimePointer: any;
+    private _isResume = false;
     private _index = (slide: IProvenanceSlide): number => {
         return this._slideDeck.slides.indexOf(slide);
     }
@@ -51,11 +52,18 @@ export class SlideDeckVisualization {
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
     }
-
+    private getCurrentY(slide: IProvenanceSlide) {
+        this._nextSlideY = 50;
+        let currentSlideIndex = this._index(slide);
+        for (let i = 0; i < currentSlideIndex; i++) {
+            this._nextSlideY += this.barTotalHeight(this._slideDeck.slides[i]);
+        }
+        this.animateTimer(0);
+    }
     private onSelect = (slide: IProvenanceSlide) => {
         if (d3.event.defaultPrevented) return;
-
         this._slideDeck.selectedSlide = slide;
+        this.getCurrentY(slide);
     }
 
     private onMouseEnter() {
@@ -216,15 +224,30 @@ export class SlideDeckVisualization {
     }
     private onNext = () => {
         this._slideDeck.next();
+        this.updateTimePointer(false);
+    }
+    private updateTimePointer(isPrev: boolean) {
+        let selectedSlide = this._slideDeck.selectedSlide;
+        if (selectedSlide) {
+            this.updateNextSlideY(selectedSlide, isPrev);
+            this.animateTimer(0);
+        }
     }
     private onPrevious = () => {
         this._slideDeck.previous();
+        this.updateTimePointer(true);
     }
     private onPlay = () => {
         if (this._player.status === STATUS.IDLE) {
-            this._player.play();
+            let selectedSlide = this._slideDeck.selectedSlide;
+            if (selectedSlide) {
+                this._player.currentSlideIndex = this._index(selectedSlide);
+                this._player.play();
+            }
         } else {
             this._player.stop();
+            this._isResume = true;
+            this.startPlayer();
         }
 
         d3.select(d3.event.target).classed(
@@ -236,7 +259,52 @@ export class SlideDeckVisualization {
             d3.select(d3.event.target).classed("fa-pause") ? false : true
         );
     }
+    private startPlayer() {
+        if (this._player.status === STATUS.PLAYING) {
+            this.animateTimer(this._slideDuration);
+        } else {
+            this._svgTimePointer.interrupt();
+        }
+    }
+    private animateTimer(duration: number) {
+        this._svgTimePointer
+            .transition()
+            .ease(d3.easeLinear)
+            .duration(duration)
+            .attr("cy", this._nextSlideY)
+            .on("end", () => this.isLastSlide());
+    }
+    private updateNextSlideY(slide: IProvenanceSlide, isPrevious: boolean) {
+        if (!isPrevious) {
+            this._nextSlideY += this.barTotalHeight(slide);
+            console.log("Total", this._nextSlideY);
+        } else {
+            this._nextSlideY -= this.barTotalHeight(slide);
+        }
+    }
 
+    isLastSlide() {
+        if (this._slideDeck.selectedSlide !== null) {
+            if (
+                this._slideDeck.slides.indexOf(
+                    this._slideDeck.selectedSlide
+                ) ===
+                this._slideDeck.slides.length - 1
+            ) {
+                setTimeout(() => {
+                    this._nextSlideY = 50;
+                    this._svgTimePointer.attr("cy", this._nextSlideY);
+                    this._slideDeck.selectedSlide = this._slideDeck.slides[0];
+                    this._slideTable
+                        .select(".fa-pause")
+                        .classed("fa-play", true)
+                        .classed("fa-pause", false);
+                    this._player.stop();
+                    this._player.currentSlideIndex = 0;
+                }, this._slideDeck.selectedSlide.duration + 2000);
+            }
+        }
+    }
     public update() {
         this.updateTimeIndices(this._slideDeck);
 
@@ -472,49 +540,17 @@ export class SlideDeckVisualization {
         this._slideTable
             .select("foreignObject.slide_add")
             .attr("y", this._placeholderY + 26);
-        this.animate();
+        this.startPlayer();
         allExistingNodes.exit().remove();
     }
-    private animate() {
-        if (this._player.status === STATUS.PLAYING) {
-            this._slideTable
-                .select(".currentTime")
-                .transition()
-                .ease(d3.easeLinear)
-                .duration(this._slideDuration)
-                .attr("cy", this._nextSlideY)
-                .on("end", () => this.isLastSlide());
-        } else {
-            this._slideTable
-                .select(".currentTime")
-                .transition()
-                .ease(d3.easeLinear)
-                .duration(0);
-        }
-    }
-    isLastSlide() {
-        if (this._slideDeck.selectedSlide !== null) {
-            if (
-                this._slideDeck.slides.indexOf(
-                    this._slideDeck.selectedSlide
-                ) ===
-                this._slideDeck.slides.length - 1
-            ) {
-                setTimeout(() => {
-                    this._nextSlideY = 50;
-                    this._slideTable
-                        .select(".currentTime")
-                        .attr("cy", this._nextSlideY);
-                    this._slideDeck.selectedSlide = this._slideDeck.slides[0];
-                    this._slideTable
-                        .select(".fa-pause")
-                        .classed("fa-play", true)
-                        .classed("fa-pause", false);
-                    this._player.stop();
-                    this._player.currentSlideIndex = 0;
-                }, 2000);
-            }
-        }
+
+    private dragEnded = (that: any, draggedObject: any) => {
+        d3.select<any, any>(that)
+            .transition()
+            .ease(d3.easeLinear)
+            .duration(0)
+            .attr("cy", d3.event.y);
+        console.log("dragged", d3.event.y);
     }
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
         this._slideDeck = slideDeck;
@@ -538,31 +574,41 @@ export class SlideDeckVisualization {
             .attr("x2", this._lineX1)
             .attr("stroke", "gray")
             .attr("stroke-width", 2);
-        this._slideTable
+        this._svgTimePointer = this._slideTable
             .append("circle")
             .attr("class", "currentTime")
             .attr("cx", this._lineX1)
             .attr("cy", this._nextSlideY)
             .attr("r", 3)
-            .attr("fill", "red");
+            .attr("fill", "red")
+            .call(
+                (d3.drag() as any)
+                    .clickDistance([2, 2])
+                    .on("end", firstArgThis(this.dragEnded))
+            );
         this.setPlaceholder("slide_placeholder");
         this.setPlaceholder("player_placeholder");
         this.setAddButton();
+
         this.setPreviousButton();
         this.setPlayButton();
         this.setNextButton();
-        slideDeck.on("slideAdded", () => this.update());
-        slideDeck.on("slideRemoved", () => this.update());
-        slideDeck.on("slidesMoved", () => this.update());
-        slideDeck.on("slideSelected", () => this.update());
         this._player = new ProvenanceSlidedeckPlayer(
             this._slideDeck.slides,
             nextSlide => {
                 this._slideDuration = nextSlide.duration;
-                this._nextSlideY += this.barTotalHeight(nextSlide);
+                if (!this._isResume) {
+                    this.updateNextSlideY(nextSlide, false);
+                } else {
+                    this._isResume = false;
+                }
                 this._slideDeck.selectedSlide = nextSlide;
             }
         );
+        slideDeck.on("slideAdded", () => this.update());
+        slideDeck.on("slideRemoved", () => this.update());
+        slideDeck.on("slidesMoved", () => this.update());
+        slideDeck.on("slideSelected", () => this.update());
 
         this.update();
     }
@@ -589,6 +635,7 @@ export class SlideDeckVisualization {
             .on("click", this.onAdd)
             .html('<i class="fa fa-file-text-o"></i>');
     }
+
     private setPlayButton() {
         this._slideTable
             .append("svg:foreignObject")
@@ -612,7 +659,7 @@ export class SlideDeckVisualization {
             .attr("height", 30)
             .append("xhtml:body")
             .on("click", this.onNext)
-            .html('<i class="fa fa-forward"></i>');
+            .html('<i class="fa fa-step-forward"></i>');
     }
     private setPreviousButton() {
         this._slideTable
@@ -624,6 +671,6 @@ export class SlideDeckVisualization {
             .attr("height", 30)
             .append("xhtml:body")
             .on("click", this.onPrevious)
-            .html('<i class="fa fa-backward"></i>');
+            .html('<i class="fa fa-step-backward"></i>');
     }
 }
