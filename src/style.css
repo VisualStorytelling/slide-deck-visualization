@@ -1,7 +1,7 @@
 @import "~font-awesome/css/font-awesome.css";
 
 #slideDeck {
-    height: 400px;
+    height: 150px;
     overflow-y: scroll;
 }
 ::-webkit-scrollbar {
@@ -38,9 +38,11 @@ div.slidedeck__slide[draggable="true"] {
     stroke: #dddddd;
 }
 
-.slides_delay_resize,
 .slides_duration_resize {
-    fill: white;
+    fill: rgb(155, 155, 255);
+}
+.slides_delay_resize {
+    fill: rgb(255, 155, 155);
 }
 
 .slides_rect {
@@ -71,10 +73,26 @@ div.slidedeck__slide[draggable="true"] {
     stroke: black;
     stroke-width: 1px;
 }
+.slides_durationtext {
+    font-weight: 600;
+}
+
 #player_placeholder {
     stroke-dasharray: none;
 }
-.slides_durationtext {
-    font-size: 12px;
-    font-weight: 600;
+
+#annotation-box {
+    stroke-dasharray: none;
+    fill: blue;
+    fill-opacity: 0.05;
+}
+
+svg.annotation-area {
+    position: absolute;
+}
+
+rect.add_annotation {
+    position: absolute;
+    stroke: black;
+    stroke-width: 1px;
 }
