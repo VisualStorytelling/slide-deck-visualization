@@ -9,8 +9,6 @@ import {
     ProvenanceSlidedeckPlayer,
     STATUS
 } from "@visualstorytelling/provenance-core";
-import { all } from "q";
-import { Stats } from "fs";
 
 function firstArgThis(f: (...args: any[]) => any) {
     return function(this: any, ...args: any[]) {
@@ -47,11 +45,11 @@ export class SlideDeckVisualization {
     private _isResume = false;
     private _index = (slide: IProvenanceSlide): number => {
         return this._slideDeck.slides.indexOf(slide);
-    }
+    };
 
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
-    }
+    };
     private getCurrentY(slide: IProvenanceSlide) {
         this._nextSlideY = 50;
         let currentSlideIndex = this._index(slide);
@@ -64,7 +62,7 @@ export class SlideDeckVisualization {
         if (d3.event.defaultPrevented) return;
         this._slideDeck.selectedSlide = slide;
         this.getCurrentY(slide);
-    }
+    };
 
     private onMouseEnter() {
         let toolbar = d3.event.target.parentElement.querySelector(
@@ -89,7 +87,7 @@ export class SlideDeckVisualization {
                 ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
                 : slideDeck.slides.length
         );
-    }
+    };
     private onClone = (slide: IProvenanceSlide) => {
         let slideDeck = this._slideDeck;
         const cloneSlide = new ProvenanceSlide(
@@ -105,7 +103,7 @@ export class SlideDeckVisualization {
                 ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
                 : slideDeck.slides.length
         );
-    }
+    };
 
     private moveDragStarted(draggedObject: any) {
         d3.select<any, any>(this)
@@ -149,7 +147,7 @@ export class SlideDeckVisualization {
                 return "translate(30," + d3.event.y + ")";
             }
         );
-    }
+    };
 
     private moveDragended = (that: any, draggedObject: any) => {
         d3.select<any, any>(that)
@@ -157,26 +155,26 @@ export class SlideDeckVisualization {
             .attr("transform", (slide: IProvenanceSlide) => {
                 return "translate(30," + this.previousSlidesHeight(slide) + ")";
             });
-    }
+    };
 
     private delayDragged = (that: any, slide: IProvenanceSlide) => {
         slide.delay = Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
         this.update();
-    }
+    };
 
     private delaySubject = (that: any, slide: IProvenanceSlide) => {
         return { y: this.barDelayHeight(slide) };
-    }
+    };
 
     private durationDragged = (that: any, slide: IProvenanceSlide) => {
         slide.duration =
             Math.max(0, d3.event.y) / this._barHeightTimeMultiplier;
         this.update();
-    }
+    };
 
     private durationSubject = (that: any, slide: IProvenanceSlide) => {
         return { y: this.barDurationHeight(slide) };
-    }
+    };
 
     private barDelayHeight(slide: IProvenanceSlide) {
         let calculatedHeight = this._barHeightTimeMultiplier * slide.delay;
@@ -196,7 +194,7 @@ export class SlideDeckVisualization {
             this.barDelayHeight(slide) +
             this.barDurationHeight(slide) +
             2 * this._resizebarheight;
-
+        console.log("Height", this.barTotalHeight);
         return calculatedHeight;
     }
 
@@ -225,7 +223,7 @@ export class SlideDeckVisualization {
     private onNext = () => {
         this._slideDeck.next();
         this.updateTimePointer(false);
-    }
+    };
     private updateTimePointer(isPrev: boolean) {
         let selectedSlide = this._slideDeck.selectedSlide;
         if (selectedSlide) {
@@ -236,7 +234,7 @@ export class SlideDeckVisualization {
     private onPrevious = () => {
         this._slideDeck.previous();
         this.updateTimePointer(true);
-    }
+    };
     private onPlay = () => {
         if (this._player.status === STATUS.IDLE) {
             let selectedSlide = this._slideDeck.selectedSlide;
@@ -258,7 +256,7 @@ export class SlideDeckVisualization {
             "fa-pause",
             d3.select(d3.event.target).classed("fa-pause") ? false : true
         );
-    }
+    };
     private startPlayer() {
         if (this._player.status === STATUS.PLAYING) {
             this.animateTimer(this._slideDuration);
@@ -551,7 +549,8 @@ export class SlideDeckVisualization {
             .duration(0)
             .attr("cy", d3.event.y);
         console.log("dragged", d3.event.y);
-    }
+        console.log("slide At Time", this._slideDeck.slideAtTime(10));
+    };
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
         this._slideDeck = slideDeck;
         this._root = d3.select(elm);
@@ -633,7 +632,7 @@ export class SlideDeckVisualization {
             .attr("height", 30)
             .append("xhtml:body")
             .on("click", this.onAdd)
-            .html('<i class="fa fa-file-text-o"></i>');
+            .html('<i class="fa fa-file-text-o" title="Add Slide"></i>');
     }
 
     private setPlayButton() {
@@ -643,11 +642,11 @@ export class SlideDeckVisualization {
             .attr("x", (this._tableWidth - 40) / 2 + 30)
             .attr("y", 10)
             .attr("cursor", "pointer")
-            .attr("width", 30)
-            .attr("height", 30)
+            .attr("width", 20)
+            .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onPlay)
-            .html('<i class="fa fa-play"></i>');
+            .html('<i class="fa fa-play" title="Play"></i>');
     }
     private setNextButton() {
         this._slideTable
@@ -655,22 +654,22 @@ export class SlideDeckVisualization {
             .attr("x", (this._tableWidth - 40) / 2 + 60)
             .attr("y", 10)
             .attr("cursor", "pointer")
-            .attr("width", 30)
-            .attr("height", 30)
+            .attr("width", 20)
+            .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onNext)
-            .html('<i class="fa fa-step-forward"></i>');
+            .html('<i class="fa fa-step-forward" title="Next Slide"></i>');
     }
     private setPreviousButton() {
         this._slideTable
             .append("svg:foreignObject")
-            .attr("x", (this._tableWidth - 40) / 2 - 10)
+            .attr("x", (this._tableWidth - 40) / 2)
             .attr("y", 10)
             .attr("cursor", "pointer")
-            .attr("width", 30)
-            .attr("height", 30)
+            .attr("width", 20)
+            .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onPrevious)
-            .html('<i class="fa fa-step-backward"></i>');
+            .html('<i class="fa fa-step-backward" title="Previous Slide"></i>');
     }
 }
