@@ -7,7 +7,6 @@ import {
   ProvenanceSlide,
   IProvenanceSlidedeck
 } from "@visualstorytelling/provenance-core";
-import { all } from "q";
 
 function firstArgThis(f: (...args: any[]) => any) {
   return function(this: any, ...args: any[]) {
@@ -715,7 +714,7 @@ export class SlideDeckVisualization {
     // Update all nodes
 
     const allNodes = newNodes
-      .merge(allExistingNodes)
+      .merge(allExistingNodes as any)
       .attr("transform", (slide: IProvenanceSlide) => {
         this._previousSlideX = this.previousSlidesWidth(slide);
         slide.xPosition =
