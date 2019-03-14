@@ -718,7 +718,7 @@ export class SlideDeckVisualization {
         // Update all nodes
 
         const allNodes = newNodes
-            .merge(allExistingNodes)
+            .merge(allExistingNodes as any)
             .attr("transform", (slide: IProvenanceSlide) => {
                 this._previousSlideX = this.previousSlidesWidth(slide);
                 slide.xPosition =
