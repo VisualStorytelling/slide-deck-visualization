@@ -46,15 +46,15 @@ div.slidedeck__slide[draggable="true"] {
 }
 
 .slides_rect {
-    fill: #f0f0f0;
     stroke: #dddddd;
     rx: 5px;
     ry: 5px;
 }
 
 .slides_rect[selected="true"] {
-    fill: #00b8d9;
-    stroke: #dddddd;
+    stroke: #000;
+    stroke-width: 5px;
+    stroke-dasharray: 5px;
 }
 
 .slides_text {
