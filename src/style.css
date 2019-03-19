@@ -96,3 +96,6 @@ rect.add_annotation {
     stroke: black;
     stroke-width: 1px;
 }
+.fa {
+    font-size: 18px;
+}

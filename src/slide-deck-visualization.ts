@@ -28,8 +28,8 @@ export class SlideDeckVisualization {
     private _barPadding = 5;
     private _resizebarwidth = 5;
     private _previousSlideX = 0;
-    private _lineX1 = 50;
-    private _placeholderWidth = 60;
+    private _lineX1 = 5;
+    private _placeholderWidth = 100;
     private _placeholderX = 0;
     private _placeholderHeight = 60;
     private _toolbarX = 10;
@@ -47,7 +47,7 @@ export class SlideDeckVisualization {
     private _gridTimeStep = 1000;
     private _gridSnap = false;
     private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
+    private _updatedPlaceholderX = 0;
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
     }
@@ -96,14 +96,21 @@ export class SlideDeckVisualization {
         toolbar.style.display = "none";
     }
 
-    private onAdd = () => {
+    private onAdd = (index: number) => {
         let slideDeck = this._slideDeck;
         const node = slideDeck.graph.current;
         const slide = new ProvenanceSlide(node.label, 5000, 0, [], node);
-        slideDeck.addSlide(slide, slideDeck.slides.length);
+        slideDeck.addSlide(slide, index);
         node.metadata.isSlideAdded = true;
         slideDeck.graph.emitNodeChangedEvent(node);
         this.selectSlide(slide);
+    }
+    private insertAfter = () => {
+        const slide = this._slideDeck.selectedSlide;
+        if (slide) {
+            const index = this._slideDeck.slides.indexOf(slide);
+            this.onAdd(index + 1);
+        }
     }
     private onClone = (slide: IProvenanceSlide) => {
         let slideDeck = this._slideDeck;
@@ -252,7 +259,6 @@ export class SlideDeckVisualization {
     private barTotalWidth(slide: IProvenanceSlide) {
         let calculatedWidth =
             this.barTransitionTimeWidth(slide) + this.barDurationWidth(slide);
-
         return calculatedWidth;
     }
 
@@ -308,13 +314,22 @@ export class SlideDeckVisualization {
         }
         this.update();
     }
-
+    private onRewind = () => {
+        let selectedSlide = this._slideDeck.slides[0];
+        this.selectSlide(selectedSlide);
+    }
+    private onFastForward = () => {
+        let selectedSlide = this._slideDeck.slides[
+            this._slideDeck.slides.length - 1
+        ];
+        this.selectSlide(selectedSlide);
+    }
     private onBackward = () => {
         this.stopPlaying();
         for (let i = this._timeIndexedSlides.length - 1; i >= 0; i--) {
             if (this._currentTime > this._timeIndexedSlides[i].startTime) {
                 this._currentTime = this._timeIndexedSlides[i].startTime;
-                this.update();
+                this.setCurrentSlide();
                 break;
             }
         }
@@ -327,23 +342,27 @@ export class SlideDeckVisualization {
                 clearInterval(playingID);
             } else {
                 this._currentTime += intervalStepMS;
-                let currentSlide = this._slideDeck.slideAtTime(
-                    this._currentTime
-                );
-                if (currentSlide !== this._slideDeck.selectedSlide) {
-                    this.selectSlide(currentSlide);
-                }
+                this.setCurrentSlide();
             }
             this.update();
         }, intervalStepMS);
     }
 
     private onPlay = () => {
+        debugger;
         if (this._currentlyPlaying) {
             this.stopPlaying();
         } else {
             this.startPlaying();
         }
+        d3.select(d3.event.target).classed(
+            "fa-play",
+            d3.select(d3.event.target).classed("fa-play") ? false : true
+        );
+        d3.select(d3.event.target).classed(
+            "fa-pause",
+            d3.select(d3.event.target).classed("fa-pause") ? false : true
+        );
     }
 
     private startPlaying = () => {
@@ -360,13 +379,18 @@ export class SlideDeckVisualization {
             .html('<i class="fa fa-play"></i>');
         this._currentlyPlaying = false;
     }
-
+    private setCurrentSlide() {
+        let currentSlide = this._slideDeck.slideAtTime(this._currentTime);
+        if (currentSlide !== this._slideDeck.selectedSlide) {
+            this.selectSlide(currentSlide);
+        }
+    }
     private onForward = () => {
         this.stopPlaying();
         for (let timedSlide of this._timeIndexedSlides) {
             if (this._currentTime < timedSlide.startTime) {
                 this._currentTime = timedSlide.startTime;
-                this.update();
+                this.setCurrentSlide();
                 break;
             }
         }
@@ -390,7 +414,7 @@ export class SlideDeckVisualization {
     }
 
     private resizeTable() {
-        this._tableWidth = window.innerWidth - 400;
+        this._tableWidth = window.innerWidth - 200;
         d3.select(".slide__table").attr("width", this._tableWidth);
         d3.select(".slides_background_rect").attr("width", this._tableWidth);
     }
@@ -497,6 +521,7 @@ export class SlideDeckVisualization {
                 time * this._barWidthTimeMultiplier -
                 this._timelineShift;
         }
+
         this._slideTable.selectAll("circle.gridTime").lower();
         this._slideTable.select("line.horizontal-line").lower();
     }
@@ -521,11 +546,11 @@ export class SlideDeckVisualization {
             .select("rect.seek-dragger")
             .attr("width", this._placeholderX)
             .raise();
-        this._slideTable.select("rect.mask").raise();
-        this._slideTable.select("#player_placeholder").raise();
-        this._slideTable.select("foreignObject.player_backward").raise();
-        this._slideTable.select("foreignObject.player_play").raise();
-        this._slideTable.select("foreignObject.player_forward").raise();
+        // this._slideTable.select("rect.mask").raise();
+        // this._slideTable.select("#player_placeholder").raise();
+        // this._slideTable.select("foreignObject.player_backward").raise();
+        // this._slideTable.select("foreignObject.player_play").raise();
+        // this._slideTable.select("foreignObject.player_forward").raise();
     }
 
     private displayGridLevel = () => {
@@ -548,7 +573,7 @@ export class SlideDeckVisualization {
         }
 
         const shiftedPosition =
-            this._originPosition + timeWidth - this._timelineShift;
+            this._originPosition + timeWidth - this._timelineShift - 30;
         this._slideTable
             .select("circle.currentTime")
             .attr("cx", shiftedPosition)
@@ -565,14 +590,25 @@ export class SlideDeckVisualization {
     private adjustSlideAddObjectPosition = () => {
         this._slideTable
             .select("foreignObject.slide_add")
-            .attr("x", this._placeholderX + 105 - this._timelineShift)
-            .attr("y", 15);
+            .attr("x", () => {
+                // if (this._placeholderX >= this._tableWidth) {
+                //     return this._updatedPlaceholderX + 290;
+                // }
+                return this._placeholderX + 63 - this._timelineShift;
+            })
+            .attr("y", 20);
+        this._slideTable
+            .select("foreignObject.insert_slide")
+            .attr("x", () => {
+                return this._placeholderX + 100 - this._timelineShift;
+            })
+            .attr("y", 20);
     }
 
     private adjustHorizontalLine = () => {
         this._slideTable
             .select("line.horizontal-line")
-            .attr("x2", this._placeholderX + 60 - this._timelineShift);
+            .attr("x2", this._placeholderX + 30 - this._timelineShift);
     }
 
     public update() {
@@ -731,7 +767,14 @@ export class SlideDeckVisualization {
             .attr("transform", (slide: IProvenanceSlide) => {
                 this._previousSlideX = this.previousSlidesWidth(slide);
                 slide.xPosition =
-                    50 + this._resizebarwidth + this.previousSlidesWidth(slide);
+                    25 + this._resizebarwidth + this.previousSlidesWidth(slide);
+                // if (this._placeholderX >= this._tableWidth) {
+                //     slide.xPosition =
+                //         slide.xPosition -
+                //         (this._placeholderX - this._tableWidth) -
+                //         300;
+                //     this._updatedPlaceholderX = slide.xPosition;
+                // }
                 return (
                     "translate(" +
                     (slide.xPosition - this._timelineShift) +
@@ -774,7 +817,7 @@ export class SlideDeckVisualization {
                     this._previousSlideX +
                     this.barDurationWidth(slide) +
                     this.barTransitionTimeWidth(slide);
-                return this.barDurationWidth(slide);
+                return this.barDurationWidth(slide) - this._barPadding;
             });
 
         slideGroup
@@ -843,14 +886,16 @@ export class SlideDeckVisualization {
             });
 
         allNodes.select("circle.time").attr("cx", (slide: IProvenanceSlide) => {
-            return this.barTotalWidth(slide) + this._resizebarwidth;
+            return this.barTotalWidth(slide) + this._resizebarwidth - 2;
         });
 
         allNodes
             .select("circle.transitionTime_time")
             .attr("cx", (slide: IProvenanceSlide) => {
                 return (
-                    this.barTransitionTimeWidth(slide) + this._resizebarwidth
+                    this.barTransitionTimeWidth(slide) +
+                    this._resizebarwidth +
+                    2
                 );
             });
 
@@ -863,7 +908,7 @@ export class SlideDeckVisualization {
         allNodes
             .select("text.slides_durationtext")
             .attr("x", (slide: IProvenanceSlide) => {
-                return this.barTotalWidth(slide) + this._barPadding + 10;
+                return this.barTotalWidth(slide) - 20;
             })
             .text((slide: IProvenanceSlide) => {
                 return (
@@ -874,7 +919,12 @@ export class SlideDeckVisualization {
                 ).toFixed(2);
             });
 
-        placeholder.attr("x", this._placeholderX + 80 - this._timelineShift);
+        placeholder.attr("x", () => {
+            // if (this._placeholderX >= this._tableWidth) {
+            //     return this._updatedPlaceholderX + 270;
+            // }
+            return this._placeholderX + 40 - this._timelineShift;
+        });
 
         this.adjustHorizontalLine();
 
@@ -894,7 +944,7 @@ export class SlideDeckVisualization {
     }
 
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
-        this._tableWidth = window.innerWidth - 400;
+        this._tableWidth = window.innerWidth - 200;
         window.addEventListener("resize", this.resizeTable);
         this._slideDeck = slideDeck;
         this._root = d3.select(elm);
@@ -919,7 +969,7 @@ export class SlideDeckVisualization {
             .attr("x1", this._lineX1)
             .attr("y1", 0)
             .attr("x2", this._lineX1)
-            .attr("y2", 100)
+            .attr("y2", 65)
             .attr("stroke", "gray")
             .attr("stroke-width", 2);
 
@@ -950,7 +1000,7 @@ export class SlideDeckVisualization {
         this._slideTable
             .append("rect")
             .attr("class", "slides_placeholder")
-            .attr("x", this._lineX1 + this._barPadding)
+            .attr("x", this._lineX1 + this._barPadding + 30)
             .attr("y", 0)
             .attr("width", this._placeholderWidth)
             .attr("height", this._placeholderHeight);
@@ -976,67 +1026,98 @@ export class SlideDeckVisualization {
         this._slideTable
             .append("svg:foreignObject")
             .attr("class", "slide_add")
-            .attr("x", this._placeholderX + 18)
+            .attr("x", this._placeholderX + 30)
             .attr("cursor", "pointer")
             .attr("width", 30)
             .attr("height", 30)
             .append("xhtml:body")
-            .on("click", this.onAdd)
-            .html('<i class="fa fa-file-text-o"></i>');
-
+            .on("click", this.onAdd.bind(slideDeck.slides.length))
+            .html('<i class="fa fa-file-text-o" title="Add Slide"></i>');
         this._slideTable
-            .append("rect")
-            .attr("class", "mask")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", 50)
-            .attr("height", 100)
-            .attr("fill", "white");
+            .append("svg:foreignObject")
+            .attr("class", "insert_slide")
+            .attr("x", this._placeholderX + 60)
+            .attr("cursor", "pointer")
+            .attr("width", 30)
+            .attr("height", 30)
+            .append("xhtml:body")
+            .on("click", this.insertAfter)
+            .html('<i class="fa fa-upload" title="Insert Slide"></i>');
+
+        // this._slideTable
+        //     .append("rect")
+        //     .attr("class", "mask")
+        //     .attr("x", 0)
+        //     .attr("y", 0)
+        //     .attr("width", 50)
+        //     .attr("height", 100)
+        //     .attr("fill", "white");
 
         this._slideTable
             .append("rect")
             .attr("class", "slides_placeholder")
             .attr("id", "player_placeholder")
-            .attr("x", 15)
-            .attr("y", 0)
-            .attr("width", 30)
-            .attr("height", 75);
-
+            .attr("x", this._originPosition + 340)
+            .attr("y", 90)
+            .attr("width", 200)
+            .attr("height", 30);
+        this._slideTable
+            .append("svg:foreignObject")
+            .attr("class", "player_rewind")
+            .attr("x", 410)
+            .attr("y", 95)
+            .attr("cursor", "pointer")
+            .attr("width", 20)
+            .attr("height", 20)
+            .append("xhtml:body")
+            .on("click", this.onRewind)
+            .html('<i class="fa fa-backward" title="First Slide"></i>');
         this._slideTable
             .append("svg:foreignObject")
             .attr("class", "player_backward")
-            .attr("x", 22)
-            .attr("y", 5)
+            .attr("x", 450)
+            .attr("y", 95)
             .attr("cursor", "pointer")
             .attr("width", 20)
             .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onBackward)
-            .html('<i class="fa fa-backward"></i>');
+            .html('<i class="fa fa-step-backward" title="Previous Slide"></i>');
 
         this._slideTable
             .append("svg:foreignObject")
             .attr("class", "player_play")
-            .attr("x", 22)
-            .attr("y", 25)
+            .attr("x", 490)
+            .attr("y", 95)
             .attr("cursor", "pointer")
             .attr("width", 20)
             .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onPlay)
-            .html('<i class="fa fa-play"></i>');
+            .html('<i class="fa fa-play" title="Play"></i>');
 
         this._slideTable
             .append("svg:foreignObject")
             .attr("class", "player_forward")
-            .attr("x", 22)
-            .attr("y", 45)
+            .attr("x", 530)
+            .attr("y", 95)
             .attr("cursor", "pointer")
             .attr("width", 20)
             .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onForward)
-            .html('<i class="fa fa-forward"></i>');
+            .html('<i class="fa fa-step-forward" title="Next Slide"></i>');
+        this._slideTable
+            .append("svg:foreignObject")
+            .attr("class", "player_fastForward")
+            .attr("x", 570)
+            .attr("y", 95)
+            .attr("cursor", "pointer")
+            .attr("width", 20)
+            .attr("height", 20)
+            .append("xhtml:body")
+            .on("click", this.onFastForward)
+            .html('<i class="fa fa-forward" title="Last Slide"></i>');
 
         this._slideTable
             .append("text")
