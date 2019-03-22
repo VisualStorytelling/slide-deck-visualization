@@ -39,7 +39,7 @@ export class SlideDeckVisualization {
     // This next variable is calculated to adjust for that error, it is a workaround but it works
     private _draggedSlideReAdjustmentFactor = 0;
 
-    private _originPosition = 60;
+    private _originPosition = 30;
     private _currentTime = 0;
     private _currentlyPlaying = false;
     private _timelineShift = 0;
@@ -412,6 +412,7 @@ export class SlideDeckVisualization {
         this._currentTime =
             (d3.event.x + this._timelineShift - this._originPosition) /
             this._barWidthTimeMultiplier;
+        console.log("current Time", this._currentTime);
         this.update();
     };
 
@@ -514,7 +515,8 @@ export class SlideDeckVisualization {
                     "cx",
                     this._originPosition +
                         time * this._barWidthTimeMultiplier -
-                        this._timelineShift
+                        this._timelineShift +
+                        this._resizebarwidth
                 )
                 .attr("cy", 65);
             time += this._gridTimeStep;
@@ -575,7 +577,7 @@ export class SlideDeckVisualization {
         }
 
         const shiftedPosition =
-            this._originPosition + timeWidth - this._timelineShift - 30;
+            this._originPosition + timeWidth - this._timelineShift;
         this._slideTable
             .select("circle.currentTime")
             .attr("cx", shiftedPosition)
@@ -973,8 +975,8 @@ export class SlideDeckVisualization {
             .append("line")
             .attr("class", "horizontal-line")
             .attr("x1", this._lineX1)
-            .attr("y1", this._resizebarwidth + this._originPosition)
-            .attr("y2", this._resizebarwidth + this._originPosition)
+            .attr("y1", this._resizebarwidth + this._originPosition + 30)
+            .attr("y2", this._resizebarwidth + this._originPosition + 30)
             .attr("stroke", "gray")
             .attr("stroke-width", 2);
 
@@ -983,7 +985,7 @@ export class SlideDeckVisualization {
             .attr("class", "seek-dragger")
             .attr("fill", "transparent")
             .attr("x", this._originPosition)
-            .attr("y", this._originPosition)
+            .attr("y", this._originPosition + 30)
             .attr("height", 12)
             .attr("width", 12)
             .attr("cursor", "pointer")
@@ -1059,7 +1061,7 @@ export class SlideDeckVisualization {
             .append("rect")
             .attr("class", "slides_placeholder")
             .attr("id", "player_placeholder")
-            .attr("x", this._originPosition + 340)
+            .attr("x", this._originPosition + 370)
             .attr("y", 90)
             .attr("width", 200)
             .attr("height", 30);
