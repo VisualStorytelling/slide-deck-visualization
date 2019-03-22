@@ -29,7 +29,7 @@ export class SlideDeckVisualization {
     private _resizebarwidth = 5;
     private _previousSlideX = 0;
     private _lineX1 = 5;
-    private _placeholderWidth = 100;
+    private _placeholderWidth = 60;
     private _placeholderX = 0;
     private _placeholderHeight = 60;
     private _toolbarX = 10;
@@ -50,7 +50,7 @@ export class SlideDeckVisualization {
     private _updatedPlaceholderX = 0;
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
-    }
+    };
 
     private onSelect = (slide: IProvenanceSlide) => {
         if (d3.event.defaultPrevented) return;
@@ -58,7 +58,7 @@ export class SlideDeckVisualization {
         if (this._currentlyPlaying) {
             this.stopPlaying();
         }
-    }
+    };
 
     private selectSlide = (slide: IProvenanceSlide | null) => {
         if (slide === null) {
@@ -81,7 +81,7 @@ export class SlideDeckVisualization {
         slide.transitionTime = originalSlideTransitionTime;
         // this.displayAnnotationText(this._slideDeck.selectedSlide.mainAnnotation, 350);
         this.update();
-    }
+    };
 
     private onMouseEnter() {
         let toolbar = d3.event.target.parentElement.querySelector(
@@ -104,14 +104,14 @@ export class SlideDeckVisualization {
         node.metadata.isSlideAdded = true;
         slideDeck.graph.emitNodeChangedEvent(node);
         this.selectSlide(slide);
-    }
+    };
     private insertAfter = () => {
         const slide = this._slideDeck.selectedSlide;
         if (slide) {
             const index = this._slideDeck.slides.indexOf(slide);
             this.onAdd(index + 1);
         }
-    }
+    };
     private onClone = (slide: IProvenanceSlide) => {
         let slideDeck = this._slideDeck;
         const cloneSlide = new ProvenanceSlide(
@@ -128,7 +128,7 @@ export class SlideDeckVisualization {
                 ? slideDeck.slides.indexOf(slideDeck.selectedSlide) + 1
                 : slideDeck.slides.length
         );
-    }
+    };
 
     private moveDragStarted(draggedObject: any) {
         d3.select<any, any>(this).classed("active", true);
@@ -181,7 +181,7 @@ export class SlideDeckVisualization {
                 return "translate(" + slidePosition + ", 0)";
             }
         );
-    }
+    };
 
     private moveDragended = (that: any, draggedObject: any) => {
         d3.select<any, any>(that)
@@ -197,18 +197,18 @@ export class SlideDeckVisualization {
                 );
             });
         this._draggedSlideReAdjustmentFactor = 0;
-    }
+    };
 
     private transitionTimeDragged = (that: any, slide: IProvenanceSlide) => {
         let transitionTime =
             Math.max(d3.event.x, 0) / this._barWidthTimeMultiplier;
         slide.transitionTime = this.getSnappedTime(slide, transitionTime, 0);
         this.update();
-    }
+    };
 
     private transitionTimeSubject = (that: any, slide: IProvenanceSlide) => {
         return { x: this.barTransitionTimeWidth(slide) };
-    }
+    };
 
     private durationDragged = (that: any, slide: IProvenanceSlide) => {
         let duration = Math.max(
@@ -217,11 +217,11 @@ export class SlideDeckVisualization {
         );
         slide.duration = this.getSnappedTime(slide, duration, 1);
         this.update();
-    }
+    };
 
     private durationSubject = (that: any, slide: IProvenanceSlide) => {
         return { x: this.barDurationWidth(slide) };
-    }
+    };
 
     private getSnappedTime = (
         slide: IProvenanceSlide,
@@ -241,7 +241,7 @@ export class SlideDeckVisualization {
             }
         }
         return time;
-    }
+    };
     private barTransitionTimeWidth(slide: IProvenanceSlide) {
         let calculatedWidth =
             this._barWidthTimeMultiplier * slide.transitionTime;
@@ -313,17 +313,17 @@ export class SlideDeckVisualization {
             }
         }
         this.update();
-    }
+    };
     private onRewind = () => {
-        let selectedSlide = this._slideDeck.slides[0];
-        this.selectSlide(selectedSlide);
-    }
+        this._currentTime = this._timeIndexedSlides[0].startTime;
+        this.setCurrentSlide();
+    };
     private onFastForward = () => {
-        let selectedSlide = this._slideDeck.slides[
-            this._slideDeck.slides.length - 1
-        ];
-        this.selectSlide(selectedSlide);
-    }
+        this._currentTime = this._timeIndexedSlides[
+            this._timeIndexedSlides.length - 1
+        ].startTime;
+        this.setCurrentSlide();
+    };
     private onBackward = () => {
         this.stopPlaying();
         for (let i = this._timeIndexedSlides.length - 1; i >= 0; i--) {
@@ -333,7 +333,7 @@ export class SlideDeckVisualization {
                 break;
             }
         }
-    }
+    };
 
     private playTimeline() {
         let intervalStepMS = 25;
@@ -363,7 +363,7 @@ export class SlideDeckVisualization {
             "fa-pause",
             d3.select(d3.event.target).classed("fa-pause") ? false : true
         );
-    }
+    };
 
     private startPlaying = () => {
         d3.select("foreignObject.player_play")
@@ -371,14 +371,14 @@ export class SlideDeckVisualization {
             .html('<i class="fa fa-pause"></i>');
         this._currentlyPlaying = true;
         this.playTimeline();
-    }
+    };
 
     private stopPlaying = () => {
         d3.select("foreignObject.player_play")
             .select("body")
             .html('<i class="fa fa-play"></i>');
         this._currentlyPlaying = false;
-    }
+    };
     private setCurrentSlide() {
         let currentSlide = this._slideDeck.slideAtTime(this._currentTime);
         if (currentSlide !== this._slideDeck.selectedSlide) {
@@ -388,13 +388,15 @@ export class SlideDeckVisualization {
     private onForward = () => {
         this.stopPlaying();
         for (let timedSlide of this._timeIndexedSlides) {
+            debugger;
             if (this._currentTime < timedSlide.startTime) {
                 this._currentTime = timedSlide.startTime;
                 this.setCurrentSlide();
+
                 break;
             }
         }
-    }
+    };
 
     private seekStarted = (that: any) => {
         if (this._currentlyPlaying) {
@@ -404,14 +406,14 @@ export class SlideDeckVisualization {
             (d3.event.x - this._originPosition + this._timelineShift) /
             this._barWidthTimeMultiplier;
         this.update();
-    }
+    };
 
     private seekDragged = (that: any) => {
         this._currentTime =
             (d3.event.x + this._timelineShift - this._originPosition) /
             this._barWidthTimeMultiplier;
         this.update();
-    }
+    };
 
     private resizeTable() {
         this._tableWidth = window.innerWidth - 200;
@@ -539,7 +541,7 @@ export class SlideDeckVisualization {
         } else {
             this._gridSnap = true;
         }
-    }
+    };
 
     private fixDrawingPriorities = () => {
         this._slideTable
@@ -551,13 +553,13 @@ export class SlideDeckVisualization {
         // this._slideTable.select("foreignObject.player_backward").raise();
         // this._slideTable.select("foreignObject.player_play").raise();
         // this._slideTable.select("foreignObject.player_forward").raise();
-    }
+    };
 
     private displayGridLevel = () => {
         d3.select("text.grid_display").text(
             "Grid step: " + (this._gridTimeStep / 1000).toFixed(2) + " Sec"
         );
-    }
+    };
 
     private drawSeekBar = () => {
         const timeWidth = this._currentTime * this._barWidthTimeMultiplier;
@@ -585,7 +587,7 @@ export class SlideDeckVisualization {
             .attr("x2", shiftedPosition)
             .attr("y2", 0)
             .raise();
-    }
+    };
 
     private adjustSlideAddObjectPosition = () => {
         this._slideTable
@@ -597,19 +599,13 @@ export class SlideDeckVisualization {
                 return this._placeholderX + 63 - this._timelineShift;
             })
             .attr("y", 20);
-        this._slideTable
-            .select("foreignObject.insert_slide")
-            .attr("x", () => {
-                return this._placeholderX + 100 - this._timelineShift;
-            })
-            .attr("y", 20);
-    }
+    };
 
     private adjustHorizontalLine = () => {
         this._slideTable
             .select("line.horizontal-line")
             .attr("x2", this._placeholderX + 30 - this._timelineShift);
-    }
+    };
 
     public update() {
         this.updateTimeIndices(this._slideDeck);
@@ -1034,15 +1030,21 @@ export class SlideDeckVisualization {
             .on("click", this.onAdd.bind(slideDeck.slides.length))
             .html('<i class="fa fa-file-text-o" title="Add Slide"></i>');
         this._slideTable
-            .append("svg:foreignObject")
-            .attr("class", "insert_slide")
-            .attr("x", this._placeholderX + 60)
+            .append("rect")
+            .attr("class", "slides_placeholder")
+            .attr("id", "insertSlide")
+            .attr("x", 650)
+            .attr("y", 90)
             .attr("cursor", "pointer")
-            .attr("width", 30)
-            .attr("height", 30)
-            .append("xhtml:body")
-            .on("click", this.insertAfter)
-            .html('<i class="fa fa-upload" title="Insert Slide"></i>');
+            .attr("width", 95)
+            .attr("height", 30);
+        this._slideTable
+            .append("text")
+            .text("Insert Slide")
+            .attr("x", 660)
+            .attr("y", 110)
+            .attr("cursor", "pointer")
+            .on("click", this.insertAfter);
 
         // this._slideTable
         //     .append("rect")
@@ -1094,7 +1096,7 @@ export class SlideDeckVisualization {
             .attr("height", 20)
             .append("xhtml:body")
             .on("click", this.onPlay)
-            .html('<i class="fa fa-play" title="Play"></i>');
+            .html('<i class="fa fa-play" title="Play" ></i>');
 
         this._slideTable
             .append("svg:foreignObject")
