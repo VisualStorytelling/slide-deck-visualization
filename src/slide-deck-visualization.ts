@@ -34,7 +34,7 @@ export class SlideDeckVisualization {
     private _placeholderHeight = 60;
     private _toolbarX = 10;
     private _toolbarY = 35;
-    private _toolbarPadding = 20;
+    private _toolbarPadding = 10;
     // Upon dragging a slide, no matter where you click on it, the beginning of the slide jumps to the mouse position.
     // This next variable is calculated to adjust for that error, it is a workaround but it works
     private _draggedSlideReAdjustmentFactor = 0;
@@ -608,7 +608,45 @@ export class SlideDeckVisualization {
             .select("line.horizontal-line")
             .attr("x2", this._placeholderX + 30 - this._timelineShift);
     };
-
+    /**
+     * @description Wrap slide name labels
+     */
+    public wrap(text: any, width: any) {
+        debugger;
+        text.each(function() {
+            var words = text
+                    .text()
+                    .split(/(?=[A-Z])/)
+                    .reverse(),
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.0, // ems
+                y = text.attr("y"),
+                dy = 0,
+                tspan = text
+                    .text(null)
+                    .append("tspan")
+                    .attr("x", 7)
+                    .attr("y", y)
+                    .attr("dy", dy + "em");
+            while ((word = words.pop())) {
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text
+                        .append("tspan")
+                        .attr("x", 7)
+                        .attr("y", y)
+                        .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                        .text(word);
+                }
+            }
+        });
+    }
     public update() {
         this.updateTimeIndices(this._slideDeck);
 
@@ -666,15 +704,21 @@ export class SlideDeckVisualization {
             .on("click", this.onSelect); //changes made for single click select --Pushpanjali;
 
         /**Appnded SVG for text ---Lorenzo */
-        slideGroup
+        var textViewport = slideGroup
             .append("svg")
             .attr("class", "text-viewport")
-            .attr("height", 60)
+            .attr("height", 60);
+
+        textViewport
             .append("text") //appended previous slides_text
             .attr("class", "slides_text")
             .attr("y", this._resizebarwidth + 2 * this._barPadding)
-            .attr("font-size", 20)
-            .attr("dy", ".35em");
+            .attr("font-size", 16)
+            .attr("dy", ".35em")
+            .text((slide: IProvenanceSlide) => {
+                return slide.name;
+            })
+            .call(this.wrap, 200);
 
         const textPosition = this._resizebarwidth + 4 * this._barPadding + 68;
         /** Ends Appnded SVG for text ---Lorenzo */
@@ -835,7 +879,7 @@ export class SlideDeckVisualization {
                 return this._toolbarY;
             })
             .attr("x", (slide: IProvenanceSlide) => {
-                return this._toolbarX + this.barTransitionTimeWidth(slide) - 3;
+                return this.barDurationWidth(slide) - this._barPadding - 45;
             });
 
         toolbar
@@ -847,8 +891,9 @@ export class SlideDeckVisualization {
                 return (
                     this._toolbarX +
                     this._toolbarPadding +
-                    this.barTransitionTimeWidth(slide) -
-                    3
+                    +this.barDurationWidth(slide) -
+                    this._barPadding -
+                    45
                 );
             });
 
@@ -856,9 +901,6 @@ export class SlideDeckVisualization {
             .select("text.slides_text")
             .attr("x", (slide: IProvenanceSlide) => {
                 return this._barPadding * 2 - 2;
-            })
-            .text((slide: IProvenanceSlide) => {
-                return slide.name;
             });
 
         slideGroup
