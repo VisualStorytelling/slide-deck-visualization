@@ -7,7 +7,7 @@ import {
     ProvenanceSlide,
     IProvenanceSlidedeck
 } from "@visualstorytelling/provenance-core";
-import { all } from "q";
+
 import { ProvenanceTreeVisualization } from "@visualstorytelling/provenance-tree-visualization";
 function firstArgThis(f: (...args: any[]) => any) {
     return function(this: any, ...args: any[]) {
