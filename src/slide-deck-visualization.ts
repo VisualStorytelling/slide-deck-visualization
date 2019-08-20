@@ -5,7 +5,8 @@ import "./style.css";
 import {
     IProvenanceSlide,
     ProvenanceSlide,
-    IProvenanceSlidedeck
+    IProvenanceSlidedeck,
+    SlideAnnotation
 } from "@visualstorytelling/provenance-core";
 
 import { ProvenanceTreeVisualization } from "@visualstorytelling/provenance-tree-visualization";
@@ -19,8 +20,8 @@ type IndexedSlide = { slide: IProvenanceSlide; startTime: number };
 
 export class SlideDeckVisualization {
     private _slideDeck: IProvenanceSlidedeck;
-    private _root: d3.Selection<HTMLDivElement, any, null, undefined>;
-    private _slideTable: d3.Selection<SVGElement, any, null, undefined>;
+    private _root: d3.Selection<HTMLDivElement, undefined, null, undefined>;
+    private _slideTable: d3.Selection<SVGElement, undefined, null, undefined>;
     private _tableHeight = 125;
     private _tableWidth = 1800;
     private _minimumSlideDuration = 1000;
@@ -584,19 +585,19 @@ export class SlideDeckVisualization {
         }
         /**Newly added code */
         const allExistingNodes = this._slideTable
-            .selectAll("g.slide")
-            .data<any>(this._slideDeck.slides, (d: IProvenanceSlide) => {
-                return d.id;
-            });
+            .selectAll<SVGGElement, IProvenanceSlide>("g.slide")
+            .data(this._slideDeck.slides, d => d.id);
+
 
         const that = this;
 
         const newNodes = allExistingNodes
             .enter()
             .append("g")
-            .attr("class", "slide")
-            .call(
-                (d3.drag() as any)
+            .attr("class", "slide");
+
+        newNodes.call(
+              (d3.drag() as any)
                     .clickDistance([2, 2])
                     .on("start", this.moveDragStarted)
                     .on("drag", firstArgThis(this.moveDragged))
@@ -673,6 +674,34 @@ export class SlideDeckVisualization {
             .append("xhtml:body")
             .on("click", this.onClone)
             .html('<i class="fa fa-copy"></i>');
+
+        function addAnnotationButton(
+          toolBar: d3.Selection<any, IProvenanceSlide, any, any>,
+          y: number,
+          x: number
+        ) {
+            toolBar.append("svg:foreignObject")
+              .attr("cursor", "pointer")
+              .attr("width", 20)
+              .attr("height", 20)
+              .attr("y", slide => y)
+              .attr("x", slide => x)
+              .append("xhtml:body")
+              .html('<i class="fa fa-font"></i>')
+              .on("click", slide => {
+                  const currentAnnotation: SlideAnnotation<string> = slide.annotations.length > 0
+                    ? slide.annotations[0] as SlideAnnotation<string> // could be saved different type..
+                    : new SlideAnnotation("");
+
+                  currentAnnotation.data = window.prompt("Enter annotation", currentAnnotation.data || "");
+
+                  if (!slide.annotations.includes(currentAnnotation)) {
+                      slide.addAnnotation(currentAnnotation);
+                  }
+              });
+        }
+        // annotation button
+        addAnnotationButton(toolbar, this._toolbarY, 50);
 
         const placeholder = this._slideTable.select("rect.slides_placeholder");
 
@@ -810,6 +839,8 @@ export class SlideDeckVisualization {
                     3
                 );
             });
+
+
 
         slideGroup
             .select("text.slides_text")

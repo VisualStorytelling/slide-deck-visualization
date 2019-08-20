@@ -40,10 +40,6 @@
     },
     "devDependencies": {
         "@types/d3": "^5.7.2",
-        "@types/d3-drag": "^1.2.1",
-        "@types/d3-hierarchy": "^1.1.2",
-        "@types/d3-scale": "^2.0.1",
-        "@types/d3-selection-multi": "^1.0.6",
         "@types/jest": "^24.0.18",
         "@types/jsdom": "^12.2.4",
         "@types/node": "^12.7.2",
@@ -75,11 +71,8 @@
         "@visualstorytelling/provenance-core": "^1.1.4"
     },
     "dependencies": {
+        "@types/d3-selection": "^1.4.1",
         "d3": "^5.10.0",
-        "d3-drag": "^1.2.4",
-        "d3-hierarchy": "^1.1.6",
-        "d3-scale": "^3.0.1",
-        "d3-selection-multi": "^1.0.1",
         "font-awesome": "^4.7.0"
     }
 }
