@@ -1,23 +1,23 @@
 {
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "target": "es6",
-    "module": "commonjs",
-    "lib": ["es2015", "es2016", "es2017", "dom"],
-    "strict": true,
-    "sourceMap": true,
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declarationDir": "dist/types",
-    "outDir": "dist/lib",
-    //    "noImplicitAny": true,
-    //    "sourceRoot": "./src",
-    //    "jsx": "react",
-    //    "allowJs": true,
-    "typeRoots": ["./node_modules/@types"],
-    "types": ["node", "jest"]
-  },
-  "include": ["src"]
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es6",
+        "module": "es2015",
+        "lib": ["es2015", "es2016", "es2017", "dom"],
+        "strict": true,
+        "sourceMap": true,
+        "declaration": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declarationDir": "dist/types",
+        "outDir": "dist/lib",
+        //    "noImplicitAny": true,
+        //    "sourceRoot": "./src",
+        //    "jsx": "react",
+        //    "allowJs": true,
+        "typeRoots": ["./node_modules/@types"],
+        "types": ["node", "jest"]
+    },
+    "include": ["src"]
 }
