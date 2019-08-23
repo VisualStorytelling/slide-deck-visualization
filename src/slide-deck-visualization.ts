@@ -643,6 +643,11 @@ export class SlideDeckVisualization {
             .attr("font-size", 20)
             .attr("dy", ".35em");
 
+        slideGroup
+          .append('image')
+          .attr('class', 'screenshot')
+          .attr('opacity', .8);
+
         const textPosition = this._resizebarwidth + 4 * this._barPadding + 68;
         /** Ends Appnded SVG for text ---Lorenzo */
         //TransitionTime Text --Lorenzo
@@ -767,6 +772,20 @@ export class SlideDeckVisualization {
                     ", 0 )"
                 );
             });
+
+        allNodes.select('image.screenshot')
+          .attr('href', d => d.metadata.screenShot)
+          .attr("width", (slide: IProvenanceSlide) => {
+              this._placeholderX =
+                this._previousSlideX +
+                this.barDurationWidth(slide) +
+                this.barTransitionTimeWidth(slide);
+              return this.barDurationWidth(slide);
+          })
+          .attr('height', 60)
+          .attr("x", (slide: IProvenanceSlide) => {
+              return this.barTransitionTimeWidth(slide);
+          })
 
         allNodes
             .select("rect.slides_transitionTime_rect")
