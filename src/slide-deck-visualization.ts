@@ -9,7 +9,9 @@ import {
     SlideAnnotation
 } from "@visualstorytelling/provenance-core";
 
-import { ProvenanceTreeVisualization } from "@visualstorytelling/provenance-tree-visualization";
+import { AnnotationDisplayContainer } from "./annotation-display/annotation-display-container";
+import { PositionedString } from "./annotation-display/annotation-display";
+
 function firstArgThis(f: (...args: any[]) => any) {
     return function(this: any, ...args: any[]) {
         return f(this, ...args);
@@ -49,6 +51,8 @@ export class SlideDeckVisualization {
     private _gridSnap = false;
     private _colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
+    private _annotationContainer = new AnnotationDisplayContainer();
+
     private onDelete = (slide: IProvenanceSlide) => {
         this._slideDeck.removeSlide(slide);
     }
@@ -63,6 +67,7 @@ export class SlideDeckVisualization {
 
     private selectSlide = (slide: IProvenanceSlide | null) => {
         if (slide === null) {
+            this._annotationContainer.clear();
             return;
         }
         let originalSlideTransitionTime = slide.transitionTime;
@@ -80,7 +85,8 @@ export class SlideDeckVisualization {
             artificialTransitionTime >= 0 ? artificialTransitionTime : 0;
         this._slideDeck.selectedSlide = slide;
         slide.transitionTime = originalSlideTransitionTime;
-        // this.displayAnnotationText(this._slideDeck.selectedSlide.mainAnnotation, 350);
+
+        this._annotationContainer.loadForSlide(slide);
         this.update();
     }
 
@@ -396,68 +402,6 @@ export class SlideDeckVisualization {
         d3.select(".slides_background_rect").attr("width", this._tableWidth);
     }
 
-    // private getTextWidth(text: string, fontSize: number, fontFace: string) {
-    //     let canvas = document.createElement('canvas');
-    //     let context = canvas.getContext('2d');
-    //     if (context === null) {
-    //         return 0;
-    //     }
-    //     context.font = fontSize + 'px ' + fontFace;
-    //     return context.measureText(text).width;
-    // }
-
-    // private displayAnnotationText = (annotation: string, width: number) => {
-    //     d3.selectAll("text.annotation").remove();
-    //     let words = annotation.split(" ");
-    //     let currentLine = "";
-    //     let newLine = "";
-    //     let y = 20;
-    //     let fontSize = 20;
-    //     words.forEach(word => {
-    //         newLine = currentLine + word + " ";
-    //         if (this.getTextWidth(newLine, fontSize - 1, "Arial") > width){
-    //             d3.select("svg.annotation-area")
-    //                 .append("text")
-    //                 .attr("class", "annotation")
-    //                 .attr("x", 10)
-    //                 .attr("y", y)
-    //                 .attr("font-size", fontSize)
-    //                 .text(currentLine);
-    //             y += 22;
-    //             currentLine = word + " ";
-    //         } else {
-    //             currentLine = newLine;
-    //         }
-    //     });
-    //     d3.select("svg.annotation-area")
-    //             .append("text")
-    //             .attr("class", "annotation")
-    //             .attr("x", 10)
-    //             .attr("y", y)
-    //             .attr("font-size", fontSize)
-    //             .text(currentLine);
-    //     this.update();
-    // }
-
-    // private addAnnotation = () => {
-    //     if(this._slideDeck.selectedSlide === null){
-    //         alert("There is no slide currently selected!");
-    //         return;
-    //     }
-    //     let newAnnotation =  prompt("Edit story: ", this._slideDeck.selectedSlide.mainAnnotation);
-    //     if(newAnnotation !== null){
-    //         this._slideDeck.selectedSlide.mainAnnotation = newAnnotation;
-    //         if(newAnnotation.length > 150){
-    //             alert("Find a way to describe your slide in less than 150 characters!");
-    //             this.addAnnotation();
-    //             return;
-    //         }
-    //     } else {
-    //         this._slideDeck.selectedSlide.mainAnnotation = "";
-    //     }
-    //     this.displayAnnotationText(this._slideDeck.selectedSlide.mainAnnotation, 350);
-    // }
-
     private adjustGridScale() {
         if (this._barWidthTimeMultiplier < 0.02) {
             this._gridTimeStep = 5000;
@@ -579,15 +523,12 @@ export class SlideDeckVisualization {
     public update() {
         this.updateTimeIndices(this._slideDeck);
 
-        /**Newly added code ---Lorenzo*/
         if (this._timelineShift < 0) {
             this._timelineShift = 0;
         }
-        /**Newly added code */
         const allExistingNodes = this._slideTable
             .selectAll<SVGGElement, IProvenanceSlide>("g.slide")
             .data(this._slideDeck.slides, d => d.id);
-
 
         const that = this;
 
@@ -597,14 +538,14 @@ export class SlideDeckVisualization {
             .attr("class", "slide");
 
         newNodes.call(
-              (d3.drag() as any)
-                    .clickDistance([2, 2])
-                    .on("start", this.moveDragStarted)
-                    .on("drag", firstArgThis(this.moveDragged))
-                    .on("end", firstArgThis(this.moveDragended))
-            );
+            (d3.drag() as any)
+                .clickDistance([2, 2])
+                .on("start", this.moveDragStarted)
+                .on("drag", firstArgThis(this.moveDragged))
+                .on("end", firstArgThis(this.moveDragended))
+        );
 
-        /**Rect between 2slides -- lorenzo */
+        /* Rect between 2slides -- lorenzo */
         newNodes
             .append("rect")
             .attr("class", "slides_transitionTime_rect")
@@ -612,9 +553,8 @@ export class SlideDeckVisualization {
             .attr("y", 0)
             .attr("height", 60)
             .on("click", this.onSelect);
-        /** Ends Rect between 2slides -- lorenzo */
 
-        /**Removed slides_delay_resize and slides_delay_rect */
+        /* Removed slides_delay_resize and slides_delay_rect */
         let slideGroup = newNodes
             .append("g")
             .attr("transform", "translate(5,0)")
@@ -628,36 +568,36 @@ export class SlideDeckVisualization {
             .attr(
                 "height",
                 60
-            ) /**removed width = this._barWidth - 2 * this._barPadding */
+            ) /* removed width = this._barWidth - 2 * this._barPadding */
             .attr("cursor", "move")
-            .on("click", this.onSelect); //changes made for single click select --Pushpanjali;
+            .on("click", this.onSelect); // changes made for single click select --Pushpanjali;
 
-        /**Appnded SVG for text ---Lorenzo */
+        /* Appnded SVG for text ---Lorenzo */
         slideGroup
             .append("svg")
             .attr("class", "text-viewport")
             .attr("height", 60)
-            .append("text") //appended previous slides_text
+            .append("text") // appended previous slides_text
             .attr("class", "slides_text")
             .attr("y", this._resizebarwidth + 2 * this._barPadding)
             .attr("font-size", 20)
             .attr("dy", ".35em");
 
         slideGroup
-          .append('image')
-          .attr('class', 'screenshot')
-          .attr('opacity', .8);
+            .append("image")
+            .attr("class", "screenshot")
+            .attr("opacity", 0.8);
 
         const textPosition = this._resizebarwidth + 4 * this._barPadding + 68;
         /** Ends Appnded SVG for text ---Lorenzo */
-        //TransitionTime Text --Lorenzo
+        // TransitionTime Text --Lorenzo
         slideGroup
-            .append("text") //removed slides_delaytext
+            .append("text") // removed slides_delaytext
             .attr("class", "slides_transitionTimetext")
             .attr("y", textPosition)
             .attr("font-size", 16)
             .attr("dy", "-.65em");
-        //Ends --TransitionTime Text --Lorenzo
+        // Ends --TransitionTime Text --Lorenzo
         let toolbar = slideGroup.append("g").attr("class", "slide_toolbar");
 
         toolbar
@@ -681,29 +621,26 @@ export class SlideDeckVisualization {
             .html('<i class="fa fa-copy"></i>');
 
         function addAnnotationButton(
-          toolBar: d3.Selection<any, IProvenanceSlide, any, any>,
-          y: number,
-          x: number
+            toolBar: d3.Selection<any, IProvenanceSlide, any, any>,
+            y: number,
+            x: number
         ) {
-            toolBar.append("svg:foreignObject")
-              .attr("cursor", "pointer")
-              .attr("width", 20)
-              .attr("height", 20)
-              .attr("y", slide => y)
-              .attr("x", slide => x)
-              .append("xhtml:body")
-              .html('<i class="fa fa-font"></i>')
-              .on("click", slide => {
-                  const currentAnnotation: SlideAnnotation<string> = slide.annotations.length > 0
-                    ? slide.annotations[0] as SlideAnnotation<string> // could be saved different type..
-                    : new SlideAnnotation("");
-
-                  currentAnnotation.data = window.prompt("Enter annotation", currentAnnotation.data || "");
-
-                  if (!slide.annotations.includes(currentAnnotation)) {
-                      slide.addAnnotation(currentAnnotation);
-                  }
-              });
+            toolBar
+                .append("svg:foreignObject")
+                .attr("cursor", "pointer")
+                .attr("width", 20)
+                .attr("height", 20)
+                .attr("y", slide => y)
+                .attr("x", slide => x)
+                .append("xhtml:body")
+                .html('<i class="fa fa-font"></i>')
+                .on("click", slide => {
+                    const newAnnotation = new SlideAnnotation<PositionedString>(
+                        { x: 0, y: 0, value: "" }
+                    );
+                    slide.addAnnotation(newAnnotation);
+                    that._annotationContainer.add(newAnnotation, true);
+                });
         }
         // annotation button
         addAnnotationButton(toolbar, this._toolbarY, 50);
@@ -773,19 +710,20 @@ export class SlideDeckVisualization {
                 );
             });
 
-        allNodes.select('image.screenshot')
-          .attr('href', d => d.metadata.screenShot)
-          .attr("width", (slide: IProvenanceSlide) => {
-              this._placeholderX =
-                this._previousSlideX +
-                this.barDurationWidth(slide) +
-                this.barTransitionTimeWidth(slide);
-              return this.barDurationWidth(slide);
-          })
-          .attr('height', 60)
-          .attr("x", (slide: IProvenanceSlide) => {
-              return this.barTransitionTimeWidth(slide);
-          })
+        allNodes
+            .select("image.screenshot")
+            .attr("href", d => d.metadata.screenShot)
+            .attr("width", (slide: IProvenanceSlide) => {
+                this._placeholderX =
+                    this._previousSlideX +
+                    this.barDurationWidth(slide) +
+                    this.barTransitionTimeWidth(slide);
+                return this.barDurationWidth(slide);
+            })
+            .attr("height", 60)
+            .attr("x", (slide: IProvenanceSlide) => {
+                return this.barTransitionTimeWidth(slide);
+            });
 
         allNodes
             .select("rect.slides_transitionTime_rect")
@@ -858,8 +796,6 @@ export class SlideDeckVisualization {
                     3
                 );
             });
-
-
 
         slideGroup
             .select("text.slides_text")

@@ -1,0 +1,52 @@
+#annotation-container {
+    position: absolute;
+}
+
+.provenanceAnnotation {
+    position: fixed;
+    background-color: transparent;
+    z-index: 100;
+}
+
+.provenanceAnnotation > .editor-toolbar {
+    background-color: white;
+    cursor: grab;
+    visibility: hidden;
+}
+.provenanceAnnotation.editable > .editor-toolbar {
+    visibility: visible;
+}
+
+.provenanceAnnotation > .editor-toolbar > a {
+    cursor: default;
+}
+.provenanceAnnotation > .CodeMirror {
+    background-color: transparent;
+    font-size: 4em;
+    color: hotpink;
+    min-height: 0;
+    border: 1px dashed white;
+}
+.provenanceAnnotation.editable > .CodeMirror {
+    border: 2px solid white;
+}
+.provenanceAnnotation:not(.editable) .CodeMirror-lines {
+    visibility: hidden;
+}
+
+.provenanceAnnotation .editor-preview {
+    background-color: transparent;
+}
+
+.provenanceAnnotation .CodeMirror-scroll {
+    min-height: 0;
+}
+
+.provenanceAnnotation .CodeMirror-cursor {
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.provenanceAnnotation.editable .editor-preview {
+    visibility: hidden;
+}
