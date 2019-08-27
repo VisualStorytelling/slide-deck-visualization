@@ -1,5 +1,5 @@
-import SimpleMDE from "simplemde";
-import "simplemde/dist/simplemde.min.css";
+import EasyMDE from "easymde";
+import "./easymde.css";
 import "./style.css";
 
 import { SlideAnnotation } from "@visualstorytelling/provenance-core";
@@ -29,7 +29,7 @@ export type PositionedString = {
 export class AnnotationDisplay {
     private _rootElement: HTMLElement;
     private _options: Options;
-    private _mde: SimpleMDE;
+    private _mde: EasyMDE;
     private _annotation: SlideAnnotation<PositionedString>;
     private _editable: boolean = false;
 
@@ -67,7 +67,7 @@ export class AnnotationDisplay {
             : "";
         this._rootElement.appendChild(textArea);
         this._options.container.appendChild(this._rootElement);
-        this._mde = new SimpleMDE({
+        this._mde = new EasyMDE({
             element: textArea,
             autofocus: true,
             status: false,
@@ -148,7 +148,7 @@ export class AnnotationDisplay {
             (this._mde as any).togglePreview();
         }
 
-        this._mde.codemirror.options.readOnly = editable ? false : "nocursor";
+        this._mde.codemirror.setOption('readOnly', editable ? false : "nocursor");
 
         if (editable) {
             this._mde.codemirror.focus();
