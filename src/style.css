@@ -1,9 +1,5 @@
 @import "~font-awesome/css/font-awesome.css";
 
-#slideDeck {
-    height: 150px;
-    overflow-y: scroll;
-}
 ::-webkit-scrollbar {
     display: none;
 }
@@ -38,23 +34,21 @@ div.slidedeck__slide[draggable="true"] {
     stroke: #dddddd;
 }
 
+.slides_delay_resize,
 .slides_duration_resize {
-    fill: rgb(155, 155, 255);
-}
-.slides_delay_resize {
-    fill: rgb(255, 155, 155);
+    fill: white;
 }
 
 .slides_rect {
+    fill: #f0f0f0;
     stroke: #dddddd;
     rx: 5px;
     ry: 5px;
 }
 
 .slides_rect[selected="true"] {
-    stroke: #000;
-    stroke-width: 5px;
-    stroke-dasharray: 5px;
+    fill: #00b8d9;
+    stroke: #dddddd;
 }
 
 .slides_text {
@@ -73,12 +67,12 @@ div.slidedeck__slide[draggable="true"] {
     stroke: black;
     stroke-width: 1px;
 }
-.slides_durationtext {
-    font-weight: 600;
-}
-
 #player_placeholder {
     stroke-dasharray: none;
+}
+.slides_durationtext {
+    font-size: 12px;
+    font-weight: 600;
 }
 
 #annotation-box {
