@@ -29,7 +29,7 @@ export class SlideDeckVisualization {
     private _slideTable: d3.Selection<SVGElement, undefined, null, undefined>;
     private _tableHeight = 150;
     private _tableWidth = 1800;
-    private _minimumSlideDuration = 1000;
+    private _minimumSlideDuration = 5000;
     private _barHeightTimeMultiplier = 0.01;
     private _barWidthTimeMultiplier = 0.05;
     private _barWidth = 270;
@@ -49,7 +49,7 @@ export class SlideDeckVisualization {
     private _placeholderHeight = 30;
     private _maxSlides = 20;
 
-    private _slideDuration = 1000;
+    private _slideDuration = 5000;
     private _timeIndexedSlides: IndexedSlide[] = [];
     private _player: ProvenanceSlidedeckPlayer<IProvenanceSlide>;
     private _nextSlideX = 30;
@@ -87,7 +87,6 @@ export class SlideDeckVisualization {
         return Math.max(calculatedWidth, 0);
     }
     private barDurationWidth(slide: IProvenanceSlide) {
-        debugger;
         let calculatedWidth = this._barWidthTimeMultiplier * slide.duration;
         return Math.max(
             calculatedWidth,
@@ -233,10 +232,6 @@ export class SlideDeckVisualization {
             timeIndex += slide.transitionTime + slide.duration;
         });
     }
-    private onNext = () => {
-        this._slideDeck.next();
-        this.updateTimePointer(false);
-    }
     private updateTimePointer(isPrev: boolean) {
         let selectedSlide = this._slideDeck.selectedSlide;
         if (selectedSlide) {
@@ -244,12 +239,16 @@ export class SlideDeckVisualization {
             this.animateTimer(0);
         }
     }
+    private onNext = () => {
+        this._slideDeck.next();
+        this.updateTimePointer(false);
+    }
+
     private onPrevious = () => {
         this._slideDeck.previous();
         this.updateTimePointer(true);
     }
     private onPlay = () => {
-        debugger;
         if (this._player.status === STATUS.IDLE) {
             let selectedSlide = this._slideDeck.selectedSlide;
             if (selectedSlide) {
@@ -279,6 +278,7 @@ export class SlideDeckVisualization {
         }
     }
     private animateTimer(duration: number) {
+        console.log(this._nextSlideX);
         this._svgTimePointer
             .transition()
             .ease(d3.easeLinear)
@@ -289,7 +289,6 @@ export class SlideDeckVisualization {
     private updateNextSlideX(slide: IProvenanceSlide, isPrevious: boolean) {
         if (!isPrevious) {
             this._nextSlideX += this.barTotalWidth(slide);
-            console.log("Total", this._nextSlideX);
         } else {
             this._nextSlideX -= this.barTotalWidth(slide);
         }
@@ -305,7 +304,7 @@ export class SlideDeckVisualization {
             ) {
                 setTimeout(() => {
                     this._nextSlideX = 30;
-                    this._svgTimePointer.attr("cy", this._nextSlideX);
+                    this._svgTimePointer.attr("cx", this._nextSlideX);
                     this._slideDeck.selectedSlide = this._slideDeck.slides[0];
                     this._slideTable
                         .select(".fa-pause")
@@ -338,13 +337,13 @@ export class SlideDeckVisualization {
                     .on("drag", firstArgThis(this.moveDragged))
                     .on("end", firstArgThis(this.moveDragended))
             );
-        newNodes
-            .append("rect")
-            .attr("class", "slides_transitionTime_rect")
-            .attr("x", this._resizebarwidth)
-            .attr("y", 0)
-            .attr("height", 60)
-            .on("click", this.onSelect);
+        // newNodes
+        //     .append("rect")
+        //     .attr("class", "slides_transitionTime_rect")
+        //     .attr("x", this._resizebarwidth)
+        //     .attr("y", 0)
+        //     .attr("height", 60)
+        //     .on("click", this.onSelect);
         // newNodes
         //     .append("rect")
         //     .attr("class", "slides_delay_resize")
@@ -461,20 +460,20 @@ export class SlideDeckVisualization {
                     ", 30 )"
                 );
             });
-        // allNodes
-        // .select("image.screenshot")
-        // .attr("href", d => d.metadata.screenShot)
-        // .attr("width", (slide: IProvenanceSlide) => {
-        //     this._placeholderX =
-        //         this._previousSlideX +
-        //         this.barDurationWidth(slide) +
-        //         this.barTransitionTimeWidth(slide);
-        //     return this.barDurationWidth(slide);
-        // })
-        // .attr("height", 60)
-        // .attr("x", (slide: IProvenanceSlide) => {
-        //     return this.barTransitionTimeWidth(slide);
-        // });
+        allNodes
+            .select("image.screenshot")
+            .attr("href", d => d.metadata.screenShot)
+            .attr("width", (slide: IProvenanceSlide) => {
+                this._placeholderX =
+                    this._previousSlideX +
+                    this.barDurationWidth(slide) +
+                    this.barTransitionTimeWidth(slide);
+                return this.barDurationWidth(slide);
+            })
+            .attr("height", 60)
+            .attr("x", (slide: IProvenanceSlide) => {
+                return this.barTransitionTimeWidth(slide);
+            });
         // allNodes
         //     .select("rect.slides_delay_rect")
         //     .attr("height", (slide: IProvenanceSlide) => {
@@ -570,7 +569,7 @@ export class SlideDeckVisualization {
                 return this.barTotalWidth(slide) + this._barPadding + 10;
             })
             .text((slide: IProvenanceSlide) => {
-                return slide.duration / 1000;
+                return slide.duration / 5000;
             });
 
         slidePlaceholder.attr("y", this._placeholderY + 20);
@@ -590,8 +589,8 @@ export class SlideDeckVisualization {
             .transition()
             .ease(d3.easeLinear)
             .duration(0)
-            .attr("cy", d3.event.y);
-        console.log("dragged", d3.event.y);
+            .attr("cx", d3.event.x);
+        console.log("dragged", d3.event.x);
         console.log("slide At Time", this._slideDeck.slideAtTime(10));
     }
     constructor(slideDeck: IProvenanceSlidedeck, elm: HTMLDivElement) {
@@ -623,7 +622,7 @@ export class SlideDeckVisualization {
             .append("circle")
             .attr("class", "currentTime")
             .attr("cx", this._lineX1)
-            .attr("cy", this._nextSlideX)
+            .attr("cy", 95)
             .attr("r", 3)
             .attr("fill", "red")
             .call(
@@ -647,6 +646,7 @@ export class SlideDeckVisualization {
                 } else {
                     this._isResume = false;
                 }
+                console.log("Selected Slide", nextSlide);
                 this._slideDeck.selectedSlide = nextSlide;
             }
         );
